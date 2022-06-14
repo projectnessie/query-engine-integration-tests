@@ -1,0 +1,276 @@
+# Copyright (C) 2021 The Authors of projectnessie
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Nessie / Iceberg
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  schedule:
+    # Run every 12 hours on week days
+    - cron:  '0 4/12 * * 1-5'
+
+jobs:
+  latest:
+    name: Nessie main/Iceberg master
+    runs-on: ubuntu-latest
+    env:
+      GIT_FETCH_DEPTH: 0
+      GIT_FETCH_OPTION: ''
+      NESSIE_DIR: included-builds/nessie
+      NESSIE_MAIN_REPOSITORY: projectnessie/nessie
+      NESSIE_MAIN_BRANCH: main
+      NESSIE_PATCH_REPOSITORY: ''
+      NESSIE_PATCH_BRANCH: ''
+      ICEBERG_DIR: included-builds/iceberg
+      ICEBERG_MAIN_REPOSITORY: apache/iceberg
+      ICEBERG_MAIN_BRANCH: master
+      ICEBERG_PATCH_REPOSITORY: ''
+      ICEBERG_PATCH_BRANCH: ''
+      SPARK_LOCAL_IP: localhost
+
+    steps:
+      - name: Prepare Git
+        run: |
+          git config --global user.email "integrations-testing@projectnessie.org"
+          git config --global user.name "Integrations Testing [Bot]"
+
+      - name: Checkout Integrations Testing repo
+        uses: actions/checkout@v3
+
+      - name: Checkout and patch Nessie
+        uses: ./.github/actions/patch-git
+        with:
+          name: Nessie
+          local-dir: ${{env.NESSIE_DIR}}
+          main-repository: ${{env.NESSIE_MAIN_REPOSITORY}}
+          main-branch: ${{env.NESSIE_MAIN_BRANCH}}
+          patch-repository: ${{env.NESSIE_PATCH_REPOSITORY}}
+          patch-branch: ${{env.NESSIE_PATCH_BRANCH}}
+          work-branch: nessie_integtest
+
+      - name: Checkout and patch Iceberg
+        uses: ./.github/actions/patch-git
+        with:
+          name: Iceberg
+          local-dir: ${{env.ICEBERG_DIR}}
+          main-repository: ${{env.ICEBERG_MAIN_REPOSITORY}}
+          main-branch: ${{env.ICEBERG_MAIN_BRANCH}}
+          patch-repository: ${{env.ICEBERG_PATCH_REPOSITORY}}
+          patch-branch: ${{env.ICEBERG_PATCH_BRANCH}}
+          work-branch: iceberg_integtest
+
+      # Setup Gradle properties, heap requirements are for the "Integration test w/ Nessie".
+      - name: Setup gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 11
+
+      - name: Iceberg Nessie test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :iceberg:iceberg-nessie:test
+
+      - name: Nessie Spark 3.1 Extensions test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :nessie-iceberg:nessie-spark-extensions-3.1_2.12:test :nessie-iceberg:nessie-spark-extensions-3.1_2.12:intTest
+
+      - name: Nessie Spark 3.2 / 2.12 Extensions test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :nessie-iceberg:nessie-spark-extensions-3.2_2.12:test :nessie-iceberg:nessie-spark-extensions-3.2_2.12:intTest
+
+      - name: Nessie Spark 3.3 / 2.12 Extensions test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest
+
+      - name: Publish Nessie + Iceberg to local Maven repo
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishLocal
+
+      - name: Gather locally published versions
+        run: |
+          NESSIE_VERSION="$(cat included-builds/nessie/version.txt)"
+          ICEBERG_VERSION="$(cat included-builds/iceberg/build/iceberg-build.properties | grep '^git.build.version=' | cut -d= -f2)"
+          echo "NESSIE_VERSION=${NESSIE_VERSION}" >> ${GITHUB_ENV}
+          echo "ICEBERG_VERSION=${ICEBERG_VERSION}" >> ${GITHUB_ENV}
+          cat <<! >> $GITHUB_STEP_SUMMARY
+          ## Published versions
+          | Published Nessie version | Published Iceberg version |
+          | ------------------------ | ------------------------- |
+          | ${NESSIE_VERSION}        | ${ICEBERG_VERSION}        |
+          !
+
+      # Iceberg does not support builds with more than one Scala versions, so we have to explicitly
+      # Specify the Scala version here - and run `intTest` for each Scala version.
+      # But note: Flink does not provide any Scala 2.13 artifacts at the moment, so when selecting
+      # Scala 2.13 with a build using Iceberg from source, all Flink related code will be skipped.
+
+      - name: Show Gradle projects for Scala 2.12
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: projects -DscalaVersion=2.12
+
+      - name: Tools & Integrations tests / Scala 2.12
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: intTest -DscalaVersion=2.12
+
+      - name: Show Gradle projects for Scala 2.13
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: projects -DscalaVersion=2.13
+
+      - name: Tools & Integrations tests / Scala 2.13
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: intTest -DscalaVersion=2.13
+
+      #- name: Checkout Presto repo
+      #  uses: actions/checkout@v3
+      #  with:
+      #    repository: ${{env.PRESTO_MAIN_REPOSITORY}}
+      #    ref: ${{env.PRESTO_MAIN_BRANCH}}
+      #    path: ${{env.PRESTO_DIR}}
+      #
+      #- name: Cache local Maven repository
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: |
+      #      ~/.m2/repository
+      #      !~/.m2/repository/org/projectnessie
+      #      !~/.m2/repository/org/apache/iceberg
+      #      ~/.m2/wrapper
+      #    key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '**/maven-wrapper.properties') }}
+      #    restore-keys: |
+      #      ${{ runner.os }}-maven-
+      #
+      #- name: Build Presto w/ latest Nessie+Iceberg
+      #  working-directory: included-builds/presto
+      #  run: |
+      #    ./mvnw \
+      #      --no-transfer-progress \
+      #      install -DskipTests \
+      #      -Ddep.iceberg.version=${ICEBERG_VERSION} \
+      #      -Ddep.nessie.version=${NESSIE_VERSION}
+
+  icberg014_nessie041:
+    name: Nessie 0.41 / Iceberg 0.14
+    runs-on: ubuntu-latest
+    env:
+      SPARK_LOCAL_IP: localhost
+
+    steps:
+      - name: Checkout Integrations Testing repo
+        uses: actions/checkout@v3
+
+      - name: Setup gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 11
+
+      - name: Show Gradle projects
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: true
+          arguments: projects -Dnessie.versionNessie=0.41.0 -Dnessie.versionIceberg=0.14.0
+
+      - name: Tools & Integrations tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: intTest -Dnessie.versionNessie=0.41.0 -Dnessie.versionIceberg=0.14.0
+
+  icberg013_nessie041:
+    name: Nessie 0.41 / Iceberg 0.13
+    runs-on: ubuntu-latest
+    env:
+      SPARK_LOCAL_IP: localhost
+
+    steps:
+      - name: Checkout Integrations Testing repo
+        uses: actions/checkout@v3
+
+      - name: Setup gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 11
+
+      - name: Show Gradle projects
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: true
+          arguments: projects -Dnessie.versionNessie=0.41.0 -Dnessie.versionIceberg=0.13.2
+
+      - name: Tools & Integrations tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: intTest -Dnessie.versionNessie=0.41.0 -Dnessie.versionIceberg=0.13.2
+
+  icberg013_nessie030:
+    name: Nessie 0.30 / Iceberg 0.13
+    runs-on: ubuntu-latest
+    env:
+      SPARK_LOCAL_IP: localhost
+
+    steps:
+      - name: Checkout Integrations Testing repo
+        uses: actions/checkout@v3
+
+      - name: Setup gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 11
+
+      - name: Show Gradle projects
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: true
+          arguments: projects -Dnessie.versionNessie=0.30.0 -Dnessie.versionIceberg=0.13.2
+
+      - name: Tools & Integrations tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: intTest -Dnessie.versionNessie=0.30.0 -Dnessie.versionIceberg=0.13.2 -x :nqeit-iceberg-spark-3.1_2.12:intTest
