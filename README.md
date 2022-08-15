@@ -2,7 +2,7 @@
 
 (Abbreviated as _NesQuEIT_, pronounced `[neskwit]`)
 
-[![Nessie / Iceberg](https://github.com/snazy/nessie-integration-tests/actions/workflows/main.yml/badge.svg)](https://github.com/snazy/nessie-integration-tests/actions/workflows/main.yml)
+[![Nessie / Iceberg](https://github.com/projectnessie/query-engine-integration-tests/actions/workflows/main.yml/badge.svg)](https://github.com/projectnessie/query-engine-integration-tests/actions/workflows/main.yml)
 
 This project is meant to test various query engines (Spark, Flink, Presto, etc) against
 [Nessie](https://projectnessie.org/) and [Apache Iceberg](https://iceberg.apache.org/).
