@@ -496,7 +496,7 @@ for (crossEngineSetup in
     continue
   }
   includeProject(
-    "nqeit-crosss-engine-$sparkMajor-$scalaMajor-$flinkMajor",
+    "nqeit-cross-engine-$sparkMajor-$scalaMajor-$flinkMajor",
     file("nqeit-cross-engine")
   )
 }
