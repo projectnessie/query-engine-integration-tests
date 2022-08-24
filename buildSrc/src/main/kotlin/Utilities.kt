@@ -284,6 +284,7 @@ fun DependencyHandlerScope.icebergFlinkDependencies(configuration: String, flink
   )
   add(configuration, "org.apache.flink:flink-connector-base:${flink.flinkVersion}")
   add(configuration, "org.apache.flink:flink-connector-files:${flink.flinkVersion}")
+  add(configuration, "org.apache.flink:flink-metrics-dropwizard:${flink.flinkVersion}")
 
   add(configuration, "org.apache.flink:flink-test-utils-junit:${flink.flinkVersion}") {
     exclude("junit")
