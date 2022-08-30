@@ -34,7 +34,7 @@ val versionJandex = "2.4.3.Final"
 val versionJetbrainsAnnotations = "23.0.0"
 val versionJunit = "5.9.0"
 val versionJsr305 = "3.0.2"
-val versionLogback = "1.2.11"
+val versionLogback = "1.4.0"
 val versionOpenapi = "3.0"
 val versionSlf4j = "1.7.36"
 
