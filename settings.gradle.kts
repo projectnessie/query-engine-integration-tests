@@ -115,7 +115,10 @@ gradle.beforeProject {
   group = "org.projectnessie.integrations-tools-tests"
 }
 
-val ideaSyncActive = System.getProperty("idea.sync.active").toBoolean()
+val ideSyncActive =
+  System.getProperty("idea.sync.active").toBoolean() ||
+          System.getProperty("eclipse.product") != null ||
+          gradle.startParameter.taskNames.any { it.startsWith("eclipse") }
 
 // Make nessie.integrationsTesting.*SourceTree absolute paths
 fun projectCanonicalPath(sub: String): File {
@@ -123,7 +126,7 @@ fun projectCanonicalPath(sub: String): File {
   val projectDir =
     rootProject.projectDir.resolve(System.getProperty(property, "./included-builds/$sub"))
   val canonicalDir = projectDir.canonicalFile
-  if (ideaSyncActive) {
+  if (ideSyncActive) {
     val additionalPropertiesDir = file("$canonicalDir/build")
     additionalPropertiesDir.mkdirs()
     val additionalPropertiesFile = file("$additionalPropertiesDir/additional-build.properties")
