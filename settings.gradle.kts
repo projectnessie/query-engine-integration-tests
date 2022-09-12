@@ -117,8 +117,8 @@ gradle.beforeProject {
 
 val ideSyncActive =
   System.getProperty("idea.sync.active").toBoolean() ||
-          System.getProperty("eclipse.product") != null ||
-          gradle.startParameter.taskNames.any { it.startsWith("eclipse") }
+    System.getProperty("eclipse.product") != null ||
+    gradle.startParameter.taskNames.any { it.startsWith("eclipse") }
 
 // Make nessie.integrationsTesting.*SourceTree absolute paths
 fun projectCanonicalPath(sub: String): File {
@@ -502,6 +502,9 @@ for (crossEngineSetup in
     "nqeit-cross-engine-$sparkMajor-$scalaMajor-$flinkMajor",
     file("nqeit-cross-engine")
   )
+  if (ideSyncActive) {
+    break
+  }
 }
 
 if (false) {
