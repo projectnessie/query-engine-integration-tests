@@ -36,7 +36,7 @@ val versionJunit = "5.9.0"
 val versionJsr305 = "3.0.2"
 val versionLogback = "1.2.11"
 val versionOpenapi = "3.0"
-val versionSlf4j = "1.7.36"
+val versionSlf4j = "2.0.1"
 
 mapOf(
     "versionCheckstyle" to versionCheckstyle,
