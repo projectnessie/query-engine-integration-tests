@@ -33,8 +33,8 @@ dependencies {
   compileOnly(platform(rootProject))
   compileOnly(project(":nqeit-nessie-common"))
 
-  compileOnly(platform("org.junit:junit-bom"))
-  compileOnly("org.junit.jupiter:junit-jupiter-engine")
+  compileOnly(platform(libs.junit.bom))
+  compileOnly(libs.junit.jupiter.engine)
 
   icebergSparkDependencies("compileOnly", sparkScala)
 }

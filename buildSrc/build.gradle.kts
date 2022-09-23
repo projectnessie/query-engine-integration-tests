@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import java.util.Properties
-
 plugins { `kotlin-dsl` }
 
 repositories {
@@ -26,34 +24,19 @@ repositories {
   }
 }
 
-// Use the versions declared in the top-level settings.gradle.kts. We can safely assume that
-// the properties file exists, because the top-level settings.gradle.kts is executed before
-// buildSrc's settings.gradle.kts or build.gradle.kts.
-val versions = Properties()
-
-file("../build/nessieBuild/versions.properties").inputStream().use { versions.load(it) }
-
-val versionIdeaExtPlugin = versions["versionIdeaExtPlugin"]
-val versionSpotlessPlugin = versions["versionSpotlessPlugin"]
-val versionNessieBuildPlugins = versions["versionNessieBuildPlugins"]
-val versionErrorPronePlugin = versions["versionErrorPronePlugin"]
-val versionJandexPlugin = versions["versionJandexPlugin"]
-val versionShadowPlugin = versions["versionShadowPlugin"]
-val versionProjectnessiePlugin = versions["versionProjectnessiePlugin"]
-val versionTestRerunPlugin = versions["versionTestRerunPlugin"]
-
 dependencies {
   implementation(gradleKotlinDsl())
-  implementation("com.diffplug.spotless:spotless-plugin-gradle:$versionSpotlessPlugin")
-  implementation("com.github.vlsi.gradle:jandex-plugin:$versionJandexPlugin")
-  implementation("gradle.plugin.com.github.johnrengelman:shadow:$versionShadowPlugin")
-  implementation("org.caffinitas.gradle.testrerun:gradle-test-rerun:$versionTestRerunPlugin")
-  implementation("org.projectnessie:quarkus-apprunner:$versionProjectnessiePlugin")
-  implementation("org.projectnessie.buildsupport:checkstyle:$versionNessieBuildPlugins")
-  implementation("org.projectnessie.buildsupport:errorprone:$versionNessieBuildPlugins")
-  implementation("org.projectnessie.buildsupport:ide-integration:$versionNessieBuildPlugins")
-  implementation("org.projectnessie.buildsupport:jandex:$versionNessieBuildPlugins")
-  implementation("org.projectnessie.buildsupport:spotless:$versionNessieBuildPlugins")
+  val ver = libs.versions
+  implementation("com.diffplug.spotless:spotless-plugin-gradle:${ver.spotlessPlugin.get()}")
+  implementation("com.github.vlsi.gradle:jandex-plugin:${ver.jandexPlugin.get()}")
+  implementation("org.caffinitas.gradle.testrerun:gradle-test-rerun:${ver.testRerunPlugin.get()}")
+  implementation("org.projectnessie:quarkus-apprunner:${ver.nessieRunPlugin.get()}")
+  val nessieVer = ver.nessieBuildPlugins.get()
+  implementation("org.projectnessie.buildsupport:checkstyle:$nessieVer")
+  implementation("org.projectnessie.buildsupport:errorprone:$nessieVer")
+  implementation("org.projectnessie.buildsupport:ide-integration:$nessieVer")
+  implementation("org.projectnessie.buildsupport:jandex:$nessieVer")
+  implementation("org.projectnessie.buildsupport:spotless:$nessieVer")
 }
 
 kotlinDslPluginOptions { jvmTarget.set(JavaVersion.VERSION_11.toString()) }

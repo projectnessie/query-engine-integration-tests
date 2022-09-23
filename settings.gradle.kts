@@ -25,65 +25,6 @@ if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11)) {
 val baseVersion = file("version.txt").readText().trim()
 
 pluginManagement {
-  // Cannot use a settings-script global variable/value, so pass the 'versions' Properties via
-  // settings.extra around.
-  val versions = java.util.Properties()
-  settings.extra["nessieBuildTools.versions"] = versions
-
-  val versionIdeaExtPlugin = "1.1.6"
-  val versionJandexPlugin = "1.82"
-  val versionProjectnessiePlugin = "0.27.3"
-  val versionNessieBuildPlugins = "0.2.12"
-  val versionShadowPlugin = "7.1.2"
-  val versionSpotlessPlugin = "6.11.0"
-  val versionTestRerunPlugin = "0.1"
-
-  plugins {
-    id("com.diffplug.spotless") version versionSpotlessPlugin
-    id("com.github.johnrengelman.plugin-shadow") version versionShadowPlugin
-    id("com.github.node-gradle.node") version "3.4.0"
-    id("com.github.vlsi.jandex") version versionJandexPlugin
-    id("io.gatling.gradle") version "3.8.4"
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
-    id("me.champeau.jmh") version "0.6.8"
-    id("net.ltgt.errorprone") version "2.0.2"
-    id("org.caffinitas.gradle.testrerun") version versionTestRerunPlugin
-    id("org.jetbrains.gradle.plugin.idea-ext") version versionIdeaExtPlugin
-    id("org.projectnessie") version versionProjectnessiePlugin
-    id("org.projectnessie.buildsupport.spotless") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.checkstyle") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.errorprone") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.ide-integration") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.jacoco") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.jacoco-aggregator") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.jandex") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.protobuf") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.publishing") version versionNessieBuildPlugins
-    id("org.projectnessie.buildsupport.reflectionconfig") version versionNessieBuildPlugins
-    id("org.projectnessie.smallrye-open-api") version versionNessieBuildPlugins
-
-    versions["versionIdeaExtPlugin"] = versionIdeaExtPlugin
-    versions["versionSpotlessPlugin"] = versionSpotlessPlugin
-    versions["versionJandexPlugin"] = versionJandexPlugin
-    versions["versionShadowPlugin"] = versionShadowPlugin
-    versions["versionNessieBuildPlugins"] = versionNessieBuildPlugins
-    versions["versionProjectnessiePlugin"] = versionProjectnessiePlugin
-    versions["versionTestRerunPlugin"] = versionTestRerunPlugin
-
-    // The project's settings.gradle.kts is "executed" before buildSrc's settings.gradle.kts and
-    // build.gradle.kts.
-    //
-    // Plugin and important dependency versions are defined here and shared with buildSrc via
-    // a properties file, and via an 'extra' property with all other modules of the Nessie build.
-    //
-    // This approach works fine with GitHub's dependabot as well
-    val nessieBuildVersionsFile = file("build/nessieBuild/versions.properties")
-    nessieBuildVersionsFile.parentFile.mkdirs()
-    nessieBuildVersionsFile.outputStream().use {
-      versions.store(it, "Nessie Build versions from settings.gradle.kts - DO NOT MODIFY!")
-    }
-  }
-
   repositories {
     mavenCentral() // prefer Maven Central, in case Gradle's repo has issues
     gradlePluginPortal()
@@ -91,12 +32,6 @@ pluginManagement {
       mavenLocal()
     }
   }
-}
-
-gradle.rootProject {
-  val prj = this
-  val versions = settings.extra["nessieBuildTools.versions"] as Properties
-  versions.forEach { k, v -> prj.extra[k.toString()] = v }
 }
 
 gradle.beforeProject {
@@ -196,7 +131,8 @@ System.err.println(
     for Source build:     $scalaRestrictionsForSourceBuild
   Flink restrictions:     $flinkRestrictions
   Presto restrictions:    $prestoRestrictions
-""".trimIndent()
+""".trimIndent(
+  )
 )
 
 fun updateDefaultVersion(restrictions: Set<String>, project: String) {

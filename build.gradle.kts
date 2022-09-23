@@ -17,63 +17,20 @@
 import org.gradle.api.internal.tasks.TaskDependencyContainer
 
 plugins {
-  `java-platform`
   id("org.projectnessie.buildsupport.ide-integration")
   `tools-integrations-conventions`
 }
 
-val versionAssertJ = "3.23.1"
-val versionCheckstyle = "10.3.4"
-val versionErrorProneAnnotations = "2.15.0"
-val versionErrorProneCore = "2.15.0"
-val versionErrorProneSlf4j = "0.1.15"
-val versionGoogleJavaFormat = "1.15.0"
-val versionGuava = "31.1-jre"
-val versionJackson = "2.13.4"
-val versionJandex = "2.4.3.Final"
-val versionJetbrainsAnnotations = "23.0.0"
-val versionJunit = "5.9.1"
-val versionJsr305 = "3.0.2"
-val versionLogback = "1.2.11"
-val versionOpenapi = "3.0"
-val versionSlf4j = "2.0.2"
-
 mapOf(
-    "versionCheckstyle" to versionCheckstyle,
-    "versionErrorProneAnnotations" to versionErrorProneAnnotations,
-    "versionErrorProneCore" to versionErrorProneCore,
-    "versionErrorProneSlf4j" to versionErrorProneSlf4j,
-    "versionGoogleJavaFormat" to versionGoogleJavaFormat,
-    "versionJandex" to versionJandex
+    "versionCheckstyle" to libs.versions.checkstyle.get(),
+    "versionErrorProneAnnotations" to libs.versions.errorprone.get(),
+    "versionErrorProneCore" to libs.versions.errorprone.get(),
+    "versionErrorProneSlf4j" to libs.versions.errorproneSlf4j.get(),
+    "versionGoogleJavaFormat" to libs.versions.googleJavaFormat.get(),
+    "versionJandex" to libs.versions.jandex.get()
   )
   .plus(loadProperties(file("build/frameworks-versions-effective.properties")))
   .forEach { (k, v) -> extra[k.toString()] = v }
-
-dependencies {
-  constraints {
-    api("ch.qos.logback:logback-access:$versionLogback")
-    api("ch.qos.logback:logback-classic:$versionLogback")
-    api("ch.qos.logback:logback-core:$versionLogback")
-    api("com.fasterxml.jackson:jackson-bom:$versionJackson")
-    api("com.google.code.findbugs:jsr305:$versionJsr305")
-    api("com.google.errorprone:error_prone_annotations:$versionErrorProneAnnotations")
-    api("com.google.errorprone:error_prone_core:$versionErrorProneCore")
-    api("com.google.googlejavaformat:google-java-format:$versionGoogleJavaFormat")
-    api("com.google.guava:guava:$versionGuava")
-    api("com.puppycrawl.tools:checkstyle:$versionCheckstyle")
-    api("jp.skypencil.errorprone.slf4j:errorprone-slf4j:$versionErrorProneSlf4j")
-    api("org.assertj:assertj-core:$versionAssertJ")
-    api("org.eclipse.microprofile.openapi:microprofile-openapi-api:$versionOpenapi")
-    api("org.jboss:jandex:$versionJandex")
-    api("org.junit:junit-bom:$versionJunit")
-    api("org.jetbrains:annotations:$versionJetbrainsAnnotations")
-    api("org.slf4j:jcl-over-slf4j:$versionSlf4j")
-    api("org.slf4j:log4j-over-slf4j:$versionSlf4j")
-    api("org.slf4j:slf4j-api:$versionSlf4j")
-  }
-}
-
-javaPlatform { allowDependencies() }
 
 tasks.named<Wrapper>("wrapper") { distributionType = Wrapper.DistributionType.ALL }
 
