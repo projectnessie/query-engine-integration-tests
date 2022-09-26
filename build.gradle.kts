@@ -23,7 +23,7 @@ plugins {
 }
 
 val versionAssertJ = "3.23.1"
-val versionCheckstyle = "10.3.3"
+val versionCheckstyle = "10.3.4"
 val versionErrorProneAnnotations = "2.15.0"
 val versionErrorProneCore = "2.15.0"
 val versionErrorProneSlf4j = "0.1.15"
