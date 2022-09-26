@@ -22,13 +22,13 @@ plugins {
 dependencies {
   implementation(platform(rootProject))
 
-  compileOnly("org.eclipse.microprofile.openapi:microprofile-openapi-api")
-  compileOnly(platform("com.fasterxml.jackson:jackson-bom"))
-  compileOnly("com.fasterxml.jackson.core:jackson-annotations")
+  compileOnly(libs.microprofile.openapi)
+  compileOnly(platform(libs.jackson.bom))
+  compileOnly(libs.jackson.annotations)
 
-  implementation(platform("org.junit:junit-bom"))
-  implementation("org.junit.jupiter:junit-jupiter-engine")
+  implementation(platform(libs.junit.bom))
+  implementation(libs.junit.jupiter.engine)
 
   implementation("org.projectnessie:nessie-client")
-  implementation("com.google.code.findbugs:jsr305")
+  implementation(libs.findbugs.jsr305)
 }

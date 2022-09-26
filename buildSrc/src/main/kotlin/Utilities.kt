@@ -309,14 +309,3 @@ fun DependencyHandlerScope.prestoDependencies(configuration: String, presto: Pre
     "com.facebook.presto:presto-tests:${presto.prestoVersion}"
   )
 }
-
-fun DependencyHandlerScope.commonTestDependencies() {
-  add("testImplementation", "org.assertj:assertj-core")
-  add("testImplementation", platform("org.junit:junit-bom"))
-  add("testImplementation", "org.junit.jupiter:junit-jupiter-api")
-  add("testImplementation", "org.junit.jupiter:junit-jupiter-params")
-  add("testRuntimeOnly", "org.junit.jupiter:junit-jupiter-engine")
-
-  add("testRuntimeOnly", "ch.qos.logback:logback-classic")
-  add("testRuntimeOnly", "org.slf4j:log4j-over-slf4j")
-}

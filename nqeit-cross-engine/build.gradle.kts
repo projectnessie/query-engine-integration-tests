@@ -35,7 +35,11 @@ dependencies {
   icebergSparkDependencies("implementation", crossEngine.sparkScala)
   icebergFlinkDependencies("implementation", crossEngine.flink)
 
-  commonTestDependencies()
+  testImplementation(platform(libs.junit.bom))
+  testImplementation(libs.bundles.junit.testing)
+  testRuntimeOnly(libs.junit.jupiter.engine)
+  testRuntimeOnly(libs.logback.classic)
+  testRuntimeOnly(libs.slf4j.log4j.over.slf4j)
 }
 
 // Note: Nessie-Quarkus server dependency and Projectnessie plugin are automatically configured,

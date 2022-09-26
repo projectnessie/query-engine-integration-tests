@@ -28,11 +28,15 @@ dependencies {
 
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-flink-extension"))
-  compileOnly("com.google.code.findbugs:jsr305")
+  compileOnly(libs.findbugs.jsr305)
 
   icebergFlinkDependencies("implementation", flink)
 
-  commonTestDependencies()
+  testImplementation(platform(libs.junit.bom))
+  testImplementation(libs.bundles.junit.testing)
+  testRuntimeOnly(libs.junit.jupiter.engine)
+  testRuntimeOnly(libs.logback.classic)
+  testRuntimeOnly(libs.slf4j.log4j.over.slf4j)
 }
 
 tasks.withType<Test>().configureEach {
