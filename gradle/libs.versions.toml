@@ -14,7 +14,7 @@ junit = "5.9.1"
 logback = "1.2.11"
 nessieBuildPlugins = "0.2.12"
 nessieRunPlugin = "0.27.3"
-slf4j = "1.7.36"
+slf4j = "2.0.2"
 spotlessPlugin = "6.11.0"
 testRerunPlugin = "0.1"
 
