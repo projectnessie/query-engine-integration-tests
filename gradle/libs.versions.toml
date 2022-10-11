@@ -1,6 +1,6 @@
 [versions]
 checkstyle = "10.3.4"
-errorprone = "2.15.0"
+errorprone = "2.16"
 errorproneSlf4j = "0.1.15"
 googleJavaFormat = "1.15.0"
 guava = "31.1-jre"
