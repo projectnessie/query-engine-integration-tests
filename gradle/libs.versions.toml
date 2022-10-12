@@ -1,7 +1,7 @@
 [versions]
 checkstyle = "10.3.4"
 errorprone = "2.16"
-errorproneSlf4j = "0.1.15"
+errorproneSlf4j = "0.1.16"
 googleJavaFormat = "1.15.0"
 guava = "31.1-jre"
 hadoop = "3.3.4"
