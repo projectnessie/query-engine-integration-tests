@@ -65,7 +65,7 @@ slf4j-jcl-over-slf4j = { module = "org.slf4j:jcl-over-slf4j", version.ref = "slf
 slf4j-log4j-over-slf4j = { module = "org.slf4j:log4j-over-slf4j", version.ref = "slf4j" }
 
 [plugins]
-errorprone = { id = "net.ltgt.errorprone", version = "2.0.2" }
+errorprone = { id = "net.ltgt.errorprone", version = "3.0.1" }
 idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version = "1.1.6" }
 jandex = { id = "com.github.vlsi.jandex", version.ref = "jandexPlugin" }
 nessie-build-checkstyle = { id = "org.projectnessie.buildsupport.checkstyle", version.ref = "nessieBuildPlugins" }
