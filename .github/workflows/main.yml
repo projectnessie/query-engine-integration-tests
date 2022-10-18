@@ -82,7 +82,7 @@ jobs:
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
 
       - name: Iceberg Nessie test
@@ -176,7 +176,7 @@ jobs:
       #      -Ddep.iceberg.version=${ICEBERG_VERSION} \
       #      -Ddep.nessie.version=${NESSIE_VERSION}
 
-  icberg10_nessie043:
+  iceberg10_nessie043:
     name: Nessie 0.43 / Iceberg 1.0
     runs-on: ubuntu-latest
     env:
@@ -195,7 +195,7 @@ jobs:
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
 
       - name: Show Gradle projects
@@ -209,7 +209,7 @@ jobs:
         with:
           arguments: intTest -Dnessie.versionNessie=0.43.0 -Dnessie.versionIceberg=1.0.0
 
-  icberg014_nessie041:
+  iceberg014_nessie041:
     name: Nessie 0.41 / Iceberg 0.14
     runs-on: ubuntu-latest
     env:
@@ -228,7 +228,7 @@ jobs:
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
 
       - name: Show Gradle projects
@@ -242,7 +242,7 @@ jobs:
         with:
           arguments: intTest -Dnessie.versionNessie=0.41.0 -Dnessie.versionIceberg=0.14.1
 
-  icberg013_nessie041:
+  iceberg013_nessie041:
     name: Nessie 0.41 / Iceberg 0.13
     runs-on: ubuntu-latest
     env:
@@ -261,7 +261,7 @@ jobs:
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
 
       - name: Show Gradle projects
@@ -275,7 +275,7 @@ jobs:
         with:
           arguments: intTest -Dnessie.versionNessie=0.41.0 -Dnessie.versionIceberg=0.13.2
 
-  icberg013_nessie030:
+  iceberg013_nessie030:
     name: Nessie 0.30 / Iceberg 0.13
     runs-on: ubuntu-latest
     env:
@@ -294,7 +294,7 @@ jobs:
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
 
       - name: Show Gradle projects
