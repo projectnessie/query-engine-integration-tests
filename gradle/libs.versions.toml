@@ -1,5 +1,5 @@
 [versions]
-checkstyle = "10.3.4"
+checkstyle = "10.4"
 errorprone = "2.16"
 errorproneSlf4j = "0.1.16"
 googleJavaFormat = "1.15.0"
