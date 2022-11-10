@@ -228,6 +228,7 @@ fun DependencyHandlerScope.icebergSparkDependencies(
   project: Project
 ) {
   add(configuration, "org.apache.iceberg:iceberg-api")
+  add(configuration, "org.apache.iceberg:iceberg-aws")
   add(configuration, "org.apache.iceberg:iceberg-nessie")
   add(
     configuration,
@@ -272,6 +273,7 @@ fun DependencyHandlerScope.icebergSparkDependencies(
 fun DependencyHandlerScope.icebergFlinkDependencies(configuration: String, flink: FlinkVersions) {
   add(configuration, "org.apache.iceberg:iceberg-core")
   add(configuration, "org.apache.iceberg:iceberg-api")
+  add(configuration, "org.apache.iceberg:iceberg-aws")
   add(configuration, "org.apache.iceberg:iceberg-flink-${flink.flinkMajorVersion}")
   add(configuration, "org.apache.iceberg:iceberg-nessie")
 

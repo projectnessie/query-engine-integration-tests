@@ -82,7 +82,10 @@ abstract class AbstractStorageLocation implements CloseableResource {
 
   @Override
   public void close() throws Throwable {
-    deleteRecursively(tempDir);
+    if (tempDir != null) {
+      deleteRecursively(tempDir);
+      tempDir = null;
+    }
   }
 
   private static void deleteRecursively(Path path) throws IOException {

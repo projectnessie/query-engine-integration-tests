@@ -294,6 +294,7 @@ if (includeIcebergBuild) {
     dependencySubstitution {
       listOf(
           "iceberg-api",
+          "iceberg-aws",
           "iceberg-bundled-guava",
           "iceberg-common",
           "iceberg-core",
@@ -375,11 +376,15 @@ include("nqeit-iceberg-spark-extension")
 
 include("nqeit-presto-extension")
 
+include("nqeit-iceberg-dremio-extension")
+
 fun includeProject(artifactId: String, projectDir: File) {
   include(artifactId)
   val p = project(":$artifactId")
   p.projectDir = projectDir
 }
+
+includeProject("nqeit-iceberg-dremio", file("nqeit-iceberg-dremio"))
 
 for (sparkVersion in sparkVersions) {
   if (restrictedVersion(sparkRestrictions, sparkVersion)) {
