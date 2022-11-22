@@ -85,6 +85,16 @@ jobs:
           distribution: 'temurin'
           java-version: 11
 
+      - name: Spotless
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: spotlessCheck
+
+      - name: Checkstyle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: checkstyleMain checkstyleTest
+
       - name: Iceberg Nessie test
         uses: gradle/gradle-build-action@v2
         with:
