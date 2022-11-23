@@ -384,7 +384,7 @@ fun includeProject(artifactId: String, projectDir: File) {
   p.projectDir = projectDir
 }
 
-includeProject("nqeit-iceberg-dremio", file("nqeit-iceberg-dremio"))
+include("nqeit-iceberg-dremio")
 
 for (sparkVersion in sparkVersions) {
   if (restrictedVersion(sparkRestrictions, sparkVersion)) {
