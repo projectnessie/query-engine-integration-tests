@@ -256,7 +256,7 @@ The dremio integration tests requires a Base-URL, PAT(Personal Access Token), Pr
 # 2. AWS credentials are set in the Catalog Settings.
 # 3. Privileges(CREATE TABLE, DROP, INSERT and SELECT) are provided in the Catalog Settings.
 
-./gradlew :nqeit-cross-engine-3.2-2.12-1.14:intTest --tests "org.projectnessie.integtests.crossengine.ITCrossEngineExternalNessie" -PtestJvmArgs="\
+./gradlew :nqeit-cross-engine-3.2-2.12-1.14:intTest --tests "org.projectnessie.integtests.crossengine.ITCrossEngineDremio" -PtestJvmArgs="\
 -Dnessie.client.uri=<nessie-uri> \
 -Dnessie.client.authentication.type=BEARER \
 -Dnessie.client.authentication.token=<token> \

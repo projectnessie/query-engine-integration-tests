@@ -44,7 +44,7 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
   IcebergDremioExtension.class
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ITCrossEngineExternalNessie implements Dremio {
+public class ITCrossEngineDremio implements Dremio {
 
   private static SparkSession spark;
   private static FlinkHelper flink;
@@ -53,9 +53,9 @@ public class ITCrossEngineExternalNessie implements Dremio {
   @BeforeAll
   public static void setupEngines(
       @Spark SparkSession spark, @Flink FlinkHelper flink, DremioHelper dremioHelper) {
-    ITCrossEngineExternalNessie.spark = spark;
-    ITCrossEngineExternalNessie.flink = flink;
-    ITCrossEngineExternalNessie.dremioHelper = dremioHelper;
+    ITCrossEngineDremio.spark = spark;
+    ITCrossEngineDremio.flink = flink;
+    ITCrossEngineDremio.dremioHelper = dremioHelper;
 
     spark.sql("DROP TABLE IF EXISTS nessie.db.from_spark");
     spark.sql("DROP TABLE IF EXISTS nessie.db.from_dremio");
