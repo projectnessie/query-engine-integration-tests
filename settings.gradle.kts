@@ -131,8 +131,8 @@ System.err.println(
     for Source build:     $scalaRestrictionsForSourceBuild
   Flink restrictions:     $flinkRestrictions
   Presto restrictions:    $prestoRestrictions
-""".trimIndent(
-  )
+"""
+    .trimIndent()
 )
 
 fun updateDefaultVersion(restrictions: Set<String>, project: String) {
