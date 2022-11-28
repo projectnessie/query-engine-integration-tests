@@ -31,7 +31,7 @@ dependencies {
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-spark-extension"))
 
-  icebergSparkDependencies("implementation", sparkScala)
+  icebergSparkDependencies("implementation", sparkScala, project)
 
   testImplementation(platform(libs.junit.bom))
   testImplementation(libs.bundles.junit.testing)

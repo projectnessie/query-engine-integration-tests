@@ -36,5 +36,5 @@ dependencies {
   compileOnly(platform(libs.junit.bom))
   compileOnly(libs.junit.jupiter.engine)
 
-  icebergSparkDependencies("compileOnly", sparkScala)
+  icebergSparkDependencies("compileOnly", sparkScala, project)
 }
