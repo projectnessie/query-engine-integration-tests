@@ -44,6 +44,8 @@ plugins {
 
 configureJava()
 
+configureScala()
+
 testTasks()
 
 configureIntTests()
@@ -237,6 +239,15 @@ fun Project.configureJava() {
       withSourcesJar()
       sourceCompatibility = JavaVersion.VERSION_1_8
       targetCompatibility = JavaVersion.VERSION_1_8
+    }
+  }
+}
+
+fun Project.configureScala() {
+  plugins.withType<ScalaPlugin>().configureEach {
+    tasks.withType<ScalaCompile>().configureEach {
+      scalaCompileOptions.keepAliveMode.set(KeepAliveMode.DAEMON)
+      scalaCompileOptions.encoding = "UTF-8"
     }
   }
 }
