@@ -94,6 +94,7 @@ fun Project.configureIntTests() {
           // ignore
         }
         environmentNonInput.put("HTTP_ACCESS_LOG_LEVEL", testLogLevel())
+        jvmArgumentsNonInput.add("-XX:SelfDestructTimer=30")
       }
 
       dependencies {
