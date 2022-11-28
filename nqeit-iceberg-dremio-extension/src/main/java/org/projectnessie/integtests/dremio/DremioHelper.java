@@ -19,13 +19,21 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class DremioHelper {
   private String token;
@@ -40,47 +48,67 @@ public class DremioHelper {
     this.catalogName = catalogName;
   }
 
-  private RequestSpecification rest() {
-    return RestAssured.given()
-        .baseUri(baseUrl)
-        .header("Authorization", "Bearer " + token)
-        .header("Content-Type", "application/json")
-        .basePath("v0/projects/" + projectId);
-  }
-
   private String createPayload(String query) {
     String payload =
         format("{ \"sql\": \"%s\", \"context\": [\"%s\", \"db\"] }", query, catalogName);
     return payload;
   }
 
+  private String executeHttpRequest(HttpUriRequestBase req) {
+    req.addHeader("Authorization", "Bearer " + token);
+    req.addHeader("Content-Type", "application/json");
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      return httpClient.execute(req, response -> EntityUtils.toString(response.getEntity()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  private String executeHttpPost(String url, String payload) {
+    HttpPost httpPost = new HttpPost(url);
+    httpPost.setEntity(new StringEntity(payload));
+    return executeHttpRequest(httpPost);
+  }
+
+  private String executeHttpGet(String url) {
+    HttpGet httpGet = new HttpGet(url);
+    return executeHttpRequest(httpGet);
+  }
+
   private String waitForJobStatus(String jobId) {
     String jobState = "RUNNING";
+    String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId;
     Set<String> finalJobStatesList = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
     while (!finalJobStatesList.contains(jobState)) {
-      String jsonString = rest().when().get("/job/" + jobId).getBody().asString();
-      jobState = JsonPath.from(jsonString).get("jobState");
+      String result = executeHttpGet(url);
+      JSONObject jObject = new JSONObject(result);
+      jobState = jObject.getString("jobState");
     }
     return jobState;
   }
 
   private List<List<Object>> parseQueryResult(String jobId) {
 
-    String jsonString = rest().when().get("/job/" + jobId + "/results").getBody().asString();
-    JsonPath path = JsonPath.from(jsonString);
-    int noOfRows = path.get("rowCount");
+    String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId + "/results";
+    String result = executeHttpGet(url);
+
+    JSONObject jObject = new JSONObject(result);
+    int noOfRows = jObject.getInt("rowCount");
+    final JSONArray table_data = jObject.getJSONArray("rows");
     List<List<Object>> list = new ArrayList<>();
     for (int i = 0; i < noOfRows; i++) {
-      int id = path.get(format("rows[%d].id", i));
-      String val = path.get(format("rows[%d].val", i));
-      list.add(asList(id, val));
+      final JSONObject row = table_data.getJSONObject(i);
+      list.add(asList(row.getInt("id"), row.getString("val")));
     }
     return list;
   }
 
   private String submitQueryAndGetJobId(String query) {
     String payload = createPayload(query);
-    String jobId = JsonPath.from(rest().body(payload).post("/sql").getBody().asString()).get("id");
+    String url = baseUrl + "/v0/projects/" + projectId + "/sql";
+    String result = executeHttpPost(url, payload);
+    JSONObject jObject = new JSONObject(result);
+    String jobId = jObject.getString("id");
     return jobId;
   }
 

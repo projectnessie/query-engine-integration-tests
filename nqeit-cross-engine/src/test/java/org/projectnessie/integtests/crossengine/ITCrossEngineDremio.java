@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.projectnessie.integtests.dremio.Dremio;
 import org.projectnessie.integtests.dremio.DremioHelper;
@@ -43,7 +41,6 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
   NessieTestsExtension.class,
   IcebergDremioExtension.class
 })
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ITCrossEngineDremio implements Dremio {
 
   private static SparkSession spark;

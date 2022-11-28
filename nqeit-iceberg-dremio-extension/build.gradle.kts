@@ -35,6 +35,6 @@ dependencies {
   compileOnly(libs.junit.jupiter.engine)
   compileOnly(libs.bundles.junit.testing)
 
-  implementation("io.rest-assured:rest-assured:$versionRestAsssured")
-  implementation("io.rest-assured:json-schema-validator:$versionRestAsssured")
+  implementation("org.apache.httpcomponents.client5:httpclient5:5.2")
+  implementation("org.json:json:20220924")
 }
