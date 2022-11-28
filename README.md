@@ -268,6 +268,10 @@ The dremio integration tests requires a Base-URL, PAT(Personal Access Token), Pr
 -Dnessie.inttest.location.iceberg.warehouse==s3://my-bucket \
 -Dnessie.client.io-impl=org.apache.iceberg.aws.s3.S3FileIO"
 ```
+Note:
+1. `dremio-url` and `dremio-token` should be set according to the following documentation: [dremio-url and dremio-token](https://docs.dremio.com/cloud/api/)
+2. The `project-id` can be found on the Sonar Projects Setting page, under General Information named as "Project-ID".
+3. The `nessie-uri` and `catalog-name` can be found on the Catalog Settings page, under General Information named as "Catalog Endpoint" and "Catalog Name".
 
 ## For developers
 
