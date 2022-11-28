@@ -73,6 +73,9 @@ abstract class AbstractStorageLocation implements CloseableResource {
   }
 
   public Path getPath() {
+    if (path == null) {
+      throw new IllegalStateException("given url is not a path: " + uri);
+    }
     return path;
   }
 
