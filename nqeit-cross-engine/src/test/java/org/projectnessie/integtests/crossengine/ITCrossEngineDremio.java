@@ -25,7 +25,6 @@ import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.projectnessie.integtests.dremio.Dremio;
 import org.projectnessie.integtests.dremio.DremioHelper;
 import org.projectnessie.integtests.dremio.IcebergDremioExtension;
 import org.projectnessie.integtests.flink.Flink;
@@ -41,7 +40,7 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
   NessieTestsExtension.class,
   IcebergDremioExtension.class
 })
-public class ITCrossEngineDremio implements Dremio {
+public class ITCrossEngineDremio {
 
   private static SparkSession spark;
   private static FlinkHelper flink;

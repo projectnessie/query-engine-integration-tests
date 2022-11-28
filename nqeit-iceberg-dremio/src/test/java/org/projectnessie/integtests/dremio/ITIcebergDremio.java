@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith({IcebergDremioExtension.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ITIcebergDremio implements Dremio {
+public class ITIcebergDremio {
 
   private static final List<List<Object>> tableRows = new ArrayList<>();
 

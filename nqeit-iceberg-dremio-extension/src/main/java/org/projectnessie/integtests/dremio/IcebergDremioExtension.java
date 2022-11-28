@@ -16,12 +16,22 @@
 package org.projectnessie.integtests.dremio;
 
 import java.util.Objects;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-public class IcebergDremioExtension implements ParameterResolver {
+public class IcebergDremioExtension implements ParameterResolver, ExecutionCondition {
+
+  @Override
+  public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
+    if (System.getProperty("dremio.url") == null) {
+      return ConditionEvaluationResult.disabled("system property dremio.url is not set");
+    }
+    return ConditionEvaluationResult.enabled("system property dremio.url is set");
+  }
 
   private static String readRequiredSystemProperty(String s) {
     return Objects.requireNonNull(System.getProperty(s), "required system property not set: " + s);
