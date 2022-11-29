@@ -81,8 +81,8 @@ public class DremioHelper {
     Set<String> finalJobStatesList = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
     while (!finalJobStatesList.contains(jobState)) {
       String result = executeHttpGet(url);
-      JSONObject jObject = new JSONObject(result);
-      jobState = jObject.getString("jobState");
+      JSONObject jsonObject = new JSONObject(result);
+      jobState = jsonObject.getString("jobState");
     }
     return jobState;
   }
@@ -92,9 +92,9 @@ public class DremioHelper {
     String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId + "/results";
     String result = executeHttpGet(url);
 
-    JSONObject jObject = new JSONObject(result);
-    int noOfRows = jObject.getInt("rowCount");
-    final JSONArray table_data = jObject.getJSONArray("rows");
+    JSONObject jsonObject = new JSONObject(result);
+    int noOfRows = jsonObject.getInt("rowCount");
+    final JSONArray table_data = jsonObject.getJSONArray("rows");
     List<List<Object>> list = new ArrayList<>();
     for (int i = 0; i < noOfRows; i++) {
       final JSONObject row = table_data.getJSONObject(i);
@@ -107,8 +107,8 @@ public class DremioHelper {
     String payload = createPayload(query);
     String url = baseUrl + "/v0/projects/" + projectId + "/sql";
     String result = executeHttpPost(url, payload);
-    JSONObject jObject = new JSONObject(result);
-    String jobId = jObject.getString("id");
+    JSONObject jsonObject = new JSONObject(result);
+    String jobId = jsonObject.getString("id");
     return jobId;
   }
 
