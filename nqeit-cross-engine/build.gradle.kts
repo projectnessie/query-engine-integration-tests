@@ -32,7 +32,7 @@ dependencies {
   implementation(project(":nqeit-iceberg-spark-extension"))
   implementation(project(":nqeit-iceberg-flink-extension"))
 
-  icebergSparkDependencies("implementation", crossEngine.sparkScala)
+  icebergSparkDependencies("implementation", crossEngine.sparkScala, project)
   icebergFlinkDependencies("implementation", crossEngine.flink)
 
   testImplementation(platform(libs.junit.bom))

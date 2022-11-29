@@ -22,6 +22,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.attributes.Bundling
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.testing.Test
@@ -223,7 +224,8 @@ fun majorVersion(version: String): String {
 
 fun DependencyHandlerScope.icebergSparkDependencies(
   configuration: String,
-  sparkScala: SparkScalaVersions
+  sparkScala: SparkScalaVersions,
+  project: Project
 ) {
   add(configuration, "org.apache.iceberg:iceberg-api")
   add(configuration, "org.apache.iceberg:iceberg-nessie")
@@ -246,7 +248,14 @@ fun DependencyHandlerScope.icebergSparkDependencies(
     add(
       configuration,
       "org.projectnessie:nessie-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
-    )
+    ) {
+      attributes {
+        attribute(
+          Bundling.BUNDLING_ATTRIBUTE,
+          project.objects.named(Bundling::class.java, Bundling.SHADOWED)
+        )
+      }
+    }
   }
 
   add(configuration, "org.apache.spark:spark-sql_${sparkScala.scalaMajorVersion}") {

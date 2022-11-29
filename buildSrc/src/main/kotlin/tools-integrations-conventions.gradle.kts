@@ -17,6 +17,7 @@
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.internal.artifacts.dependencies.DefaultImmutableVersionConstraint
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.bundling.Jar
@@ -24,6 +25,7 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.external.javadoc.CoreJavadocOptions
+import org.gradle.internal.component.external.model.DefaultModuleComponentSelector
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.maven
 import org.gradle.kotlin.dsl.named
@@ -63,8 +65,17 @@ configurations.all {
               req.group == "org.apache.iceberg" &&
               (req.version.isEmpty() || req.version != icebergVersionToUse)
           ) {
-            val target = "${req.group}:${req.module}:$icebergVersionToUse"
-            useTarget(target, "Managed Iceberg version to $icebergVersionToUse")
+            // TODO get rid of the internal Gradle classes DefaultImmutableVersionConstraint +
+            //  DefaultModuleComponentSelector.
+            val version = DefaultImmutableVersionConstraint.of(icebergVersionToUse)
+            val target =
+              DefaultModuleComponentSelector.newSelector(
+                req.moduleIdentifier,
+                version,
+                req.attributes,
+                req.requestedCapabilities
+              )
+            useTarget(target, "Managed Iceberg version to $version (attributes: ${req.attributes})")
           }
           if (
             nessieVersionToUse != null &&
@@ -73,8 +84,17 @@ configurations.all {
               req.module != "nessie-antlr-runtime" &&
               (req.module.startsWith("nessie") || req.module == "iceberg-views")
           ) {
-            val target = "${req.group}:${req.module}:$nessieVersionToUse"
-            useTarget(target, "Managed Nessie version to $nessieVersionToUse")
+            // TODO get rid of the internal Gradle classes DefaultImmutableVersionConstraint +
+            //  DefaultModuleComponentSelector.
+            val version = DefaultImmutableVersionConstraint.of(nessieVersionToUse)
+            val target =
+              DefaultModuleComponentSelector.newSelector(
+                req.moduleIdentifier,
+                version,
+                req.attributes,
+                req.requestedCapabilities
+              )
+            useTarget(target, "Managed Nessie version to $version (attributes: ${req.attributes})")
           }
         }
       }
