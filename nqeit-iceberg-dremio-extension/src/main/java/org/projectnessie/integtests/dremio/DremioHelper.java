@@ -76,6 +76,8 @@ public class DremioHelper {
   }
 
   private String waitForJobStatus(String jobId) {
+    // The doc for getting the job status for cloud is not there, but it is similar to software
+    // See docs: https://docs.dremio.com/software/rest-api/jobs/get-job/
     String jobState = "RUNNING";
     String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId;
     Set<String> finalJobStatesList = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
@@ -88,22 +90,24 @@ public class DremioHelper {
   }
 
   private List<List<Object>> parseQueryResult(String jobId) {
-
+    // The doc for getting the job results for cloud is not there, but it is similar to software
+    // See docs: https://docs.dremio.com/software/rest-api/jobs/get-job/
     String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId + "/results";
     String result = executeHttpGet(url);
 
     JSONObject jsonObject = new JSONObject(result);
     int noOfRows = jsonObject.getInt("rowCount");
-    final JSONArray table_data = jsonObject.getJSONArray("rows");
+    JSONArray tableData = jsonObject.getJSONArray("rows");
     List<List<Object>> list = new ArrayList<>();
     for (int i = 0; i < noOfRows; i++) {
-      final JSONObject row = table_data.getJSONObject(i);
+      JSONObject row = tableData.getJSONObject(i);
       list.add(asList(row.getInt("id"), row.getString("val")));
     }
     return list;
   }
 
   private String submitQueryAndGetJobId(String query) {
+    // See docs: https://docs.dremio.com/cloud/api/sql/
     String payload = createPayload(query);
     String url = baseUrl + "/v0/projects/" + projectId + "/sql";
     String result = executeHttpPost(url, payload);
@@ -123,11 +127,7 @@ public class DremioHelper {
     return parseQueryResult(jobId);
   }
 
-  public void runInsertQuery(String query) {
-    awaitSqlJobResult(query);
-  }
-
-  public void executeDmlStatement(String query) {
+  public void runQuery(String query) {
     awaitSqlJobResult(query);
   }
 }

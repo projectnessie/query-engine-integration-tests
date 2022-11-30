@@ -20,8 +20,6 @@ plugins {
   id("org.projectnessie")
 }
 
-val versionRestAsssured = "5.3.0"
-
 dependencies {
   compileOnly(platform(rootProject))
 
@@ -35,6 +33,6 @@ dependencies {
   compileOnly(libs.junit.jupiter.engine)
   compileOnly(libs.bundles.junit.testing)
 
-  implementation("org.apache.httpcomponents.client5:httpclient5:5.2")
-  implementation("org.json:json:20220924")
+  implementation(libs.apache.http.client5)
+  implementation(libs.json.java)
 }

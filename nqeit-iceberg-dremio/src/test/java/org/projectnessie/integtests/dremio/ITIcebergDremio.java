@@ -39,19 +39,19 @@ public class ITIcebergDremio {
   }
 
   private static void dropTableIfExists(DremioHelper dremioHelper) {
-    dremioHelper.executeDmlStatement("DROP TABLE IF EXISTS foo_bar");
+    dremioHelper.runQuery("DROP TABLE IF EXISTS foo_bar");
   }
 
   @Order(100)
   @Test
   public void createTable(DremioHelper dremioHelper) {
-    dremioHelper.executeDmlStatement("CREATE TABLE foo_bar (id INT, val VARCHAR)");
+    dremioHelper.runQuery("CREATE TABLE foo_bar (id INT, val VARCHAR)");
   }
 
   @Order(110)
   @Test
   public void insertInto(DremioHelper dremioHelper) {
-    dremioHelper.runInsertQuery("INSERT INTO foo_bar VALUES (456,'bar')");
+    dremioHelper.runQuery("INSERT INTO foo_bar VALUES (456,'bar')");
     tableRows.add(asList(456, "bar"));
   }
 
@@ -65,7 +65,7 @@ public class ITIcebergDremio {
   @Order(130)
   @Test
   public void insertInto2(DremioHelper dremioHelper) {
-    dremioHelper.runInsertQuery("INSERT INTO foo_bar VALUES (123,'foo')");
+    dremioHelper.runQuery("INSERT INTO foo_bar VALUES (123,'foo')");
     tableRows.add(asList(123, "foo"));
   }
 
@@ -79,6 +79,6 @@ public class ITIcebergDremio {
   @Order(150)
   @Test
   public void dropTable(DremioHelper dremioHelper) {
-    dremioHelper.executeDmlStatement("DROP TABLE foo_bar");
+    dremioHelper.runQuery("DROP TABLE foo_bar");
   }
 }

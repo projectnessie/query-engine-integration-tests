@@ -1,4 +1,5 @@
 [versions]
+awssdk = "2.18.16"
 checkstyle = "10.5.0"
 errorprone = "2.16"
 errorproneSlf4j = "0.1.16"
@@ -32,7 +33,10 @@ managed-slf4j = ["slf4j-jcl-over-slf4j", "slf4j-log4j-over-slf4j", "slf4j-jcl-ov
 junit-testing = ["assertj-core", "junit-jupiter-api", "junit-jupiter-params"]
 
 [libraries]
+apache-http-client5 = { module = "org.apache.httpcomponents.client5:httpclient5", version="5.2" }
 assertj-core = { module = "org.assertj:assertj-core", version = "3.23.1" }
+awssdk-bundle = { module = "software.amazon.awssdk:bundle", version.ref = "awssdk"}
+awssdk-client = { module = "software.amazon.awssdk:url-connection-client", version.ref = "awssdk"}
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
 errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
@@ -50,6 +54,7 @@ jackson-core = { module = "com.fasterxml.jackson.core:jackson-databind" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
 jandex = { module = "org.jboss:jandex", version.ref = "jandex" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.0" }
+json-java = { module = "org.json:json", version = "20220924" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }

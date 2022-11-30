@@ -65,7 +65,7 @@ public class ITCrossEngineDremio {
     tableRows.add(asList(123, "foo"));
     assertSelectFromEngines(tableRows, testTable);
 
-    dremioHelper.runInsertQuery(format("INSERT INTO %s VALUES (456,'bar')", testTable));
+    dremioHelper.runQuery(format("INSERT INTO %s VALUES (456,'bar')", testTable));
     tableRows.add(asList(456, "bar"));
     assertSelectFromEngines(tableRows, testTable);
 
@@ -84,8 +84,7 @@ public class ITCrossEngineDremio {
     tableRows.remove(asList(123, "foo"));
     assertSelectFromEngines(tableRows, testTable);
 
-    dremioHelper.executeDmlStatement(
-        format("DELETE FROM %s WHERE id=456 and val='bar'", testTable));
+    dremioHelper.runQuery(format("DELETE FROM %s WHERE id=456 and val='bar'", testTable));
     tableRows.remove(asList(456, "bar"));
     assertSelectFromEngines(tableRows, testTable);
 
@@ -123,7 +122,7 @@ public class ITCrossEngineDremio {
   @Test
   public void testDremioTable() {
     String testTable = "from_dremio";
-    dremioHelper.executeDmlStatement(format("CREATE TABLE %s (id INT, val VARCHAR)", testTable));
+    dremioHelper.runQuery(format("CREATE TABLE %s (id INT, val VARCHAR)", testTable));
     runInsertTests(testTable);
     runDeleteTests(testTable);
   }

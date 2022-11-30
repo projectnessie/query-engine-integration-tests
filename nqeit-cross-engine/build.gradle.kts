@@ -40,8 +40,8 @@ dependencies {
   testRuntimeOnly(libs.junit.jupiter.engine)
   testRuntimeOnly(libs.logback.classic)
   testRuntimeOnly(libs.slf4j.log4j.over.slf4j)
-  testRuntimeOnly("software.amazon.awssdk:bundle:2.18.16")
-  testRuntimeOnly("software.amazon.awssdk:url-connection-client:2.18.16")
+  testRuntimeOnly(libs.awssdk.bundle)
+  testRuntimeOnly(libs.awssdk.client)
 }
 
 // Note: Nessie-Quarkus server dependency and Projectnessie plugin are automatically configured,
