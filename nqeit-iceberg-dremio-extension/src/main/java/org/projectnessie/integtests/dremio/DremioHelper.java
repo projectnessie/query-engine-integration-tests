@@ -118,7 +118,10 @@ public class DremioHelper {
 
   private String awaitSqlJobResult(String query) {
     String jobId = submitQueryAndGetJobId(query);
-    assertThat("COMPLETED").isEqualTo(waitForJobStatus(jobId));
+    String jobStatus = waitForJobStatus(jobId);
+    assertThat("COMPLETED")
+        .withFailMessage("Query: %s, jobId: %s, jobStatus: %s", query, jobId, jobStatus)
+        .isEqualTo(jobStatus);
     return jobId;
   }
 
