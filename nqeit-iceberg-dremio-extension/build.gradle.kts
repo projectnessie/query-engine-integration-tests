@@ -33,6 +33,6 @@ dependencies {
   compileOnly(libs.junit.jupiter.engine)
   compileOnly(libs.bundles.junit.testing)
 
-  implementation(libs.apache.http.client5)
-  implementation(libs.json.java)
+  implementation(libs.jackson.databind)
+  implementation(libs.jackson.core)
 }

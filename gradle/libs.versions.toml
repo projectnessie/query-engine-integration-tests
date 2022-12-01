@@ -50,11 +50,10 @@ immutables-value-fixture = { module = "org.immutables:value-fixture", version.re
 immutables-value-processor = { module = "org.immutables:value-processor", version.ref = "immutables" }
 jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.14.1" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations" }
-jackson-core = { module = "com.fasterxml.jackson.core:jackson-databind" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version = "2.14.1" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.14.1" }
 jandex = { module = "org.jboss:jandex", version.ref = "jandex" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.0" }
-json-java = { module = "org.json:json", version = "20220924" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
