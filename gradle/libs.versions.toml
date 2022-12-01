@@ -33,7 +33,6 @@ managed-slf4j = ["slf4j-jcl-over-slf4j", "slf4j-log4j-over-slf4j", "slf4j-jcl-ov
 junit-testing = ["assertj-core", "junit-jupiter-api", "junit-jupiter-params"]
 
 [libraries]
-apache-http-client5 = { module = "org.apache.httpcomponents.client5:httpclient5", version="5.2" }
 assertj-core = { module = "org.assertj:assertj-core", version = "3.23.1" }
 awssdk-bundle = { module = "software.amazon.awssdk:bundle", version.ref = "awssdk"}
 awssdk-client = { module = "software.amazon.awssdk:url-connection-client", version.ref = "awssdk"}
@@ -50,8 +49,8 @@ immutables-value-fixture = { module = "org.immutables:value-fixture", version.re
 immutables-value-processor = { module = "org.immutables:value-processor", version.ref = "immutables" }
 jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version = "2.14.1" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations" }
-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version = "2.14.1" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.14.1" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
 jandex = { module = "org.jboss:jandex", version.ref = "jandex" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.0" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }

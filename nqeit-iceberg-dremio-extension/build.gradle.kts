@@ -33,6 +33,7 @@ dependencies {
   compileOnly(libs.junit.jupiter.engine)
   compileOnly(libs.bundles.junit.testing)
 
+  implementation(platform(libs.jackson.bom))
   implementation(libs.jackson.databind)
   implementation(libs.jackson.core)
 }
