@@ -64,10 +64,11 @@ public class DremioHelper {
     return payload;
   }
 
-  private String readResponse(HttpURLConnection con) throws IOException {
+  private String readResponse(HttpURLConnection con, String url) throws IOException {
     int responseCode = con.getResponseCode();
     if (responseCode != HttpURLConnection.HTTP_OK) { // success
-      throw new IOException("url we git is not expected");
+      throw new IOException(
+          "Request for " + url + " was not successful with http code: " + responseCode);
     }
     try (BufferedReader in =
         new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
@@ -94,7 +95,7 @@ public class DremioHelper {
     } else {
       con.setRequestMethod("GET");
     }
-    return readResponse(con);
+    return readResponse(con, url);
   }
 
   private String waitForJobStatus(String jobId) throws IOException {
