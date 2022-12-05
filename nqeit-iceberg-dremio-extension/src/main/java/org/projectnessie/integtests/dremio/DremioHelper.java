@@ -15,12 +15,10 @@
  */
 package org.projectnessie.integtests.dremio;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -32,9 +30,13 @@ import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class DremioHelper {
@@ -46,9 +48,7 @@ public class DremioHelper {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private static JsonNode parseJson(String json) throws IOException {
-    JsonFactory factory = OBJECT_MAPPER.getFactory();
-    JsonParser parser = factory.createParser(json);
-    return OBJECT_MAPPER.readTree(parser);
+    return OBJECT_MAPPER.readTree(json);
   }
 
   DremioHelper(String projectId, String token, String baseUrl, String catalogName) {
@@ -58,10 +58,11 @@ public class DremioHelper {
     this.catalogName = catalogName;
   }
 
-  private String createPayload(String query) {
-    String payload =
-        format("{ \"sql\": \"%s\", \"context\": [\"%s\", \"db\"] }", query, catalogName);
-    return payload;
+  private String createPayload(String query) throws JsonProcessingException {
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("sql", query);
+    payload.put("context", asList(catalogName, "db"));
+    return OBJECT_MAPPER.writeValueAsString(payload);
   }
 
   private String readResponse(HttpURLConnection con, String url) throws IOException {
@@ -98,18 +99,37 @@ public class DremioHelper {
     return readResponse(con, url);
   }
 
-  private String waitForJobStatus(String jobId) throws IOException {
+  private void waitForJobCompletion(String jobId, String query) throws IOException {
     // The doc for getting the job status for cloud is not there, but it is similar to software
     // See docs: https://docs.dremio.com/software/rest-api/jobs/get-job/
     String jobState = "RUNNING";
     String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId;
-    Set<String> finalJobStatesList = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
-    while (!finalJobStatesList.contains(jobState)) {
-      String result = performHttpRequest(url, null);
-      JsonNode node = parseJson(result);
+    Set<String> finalJobStates = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
+    // Default Timeout for engine-startup is 5min
+    Duration timeout = Duration.ofMinutes(5);
+    Instant deadline = Instant.now().plus(timeout);
+
+    while (true) {
+      String responseBody = performHttpRequest(url, null);
+      JsonNode node = parseJson(responseBody);
       jobState = node.get("jobState").textValue();
+      if (finalJobStates.contains(jobState)) {
+        assertThat(jobState)
+            .withFailMessage("jobId: %s\nQuery: %s\nresponse body: %s", jobId, query, responseBody)
+            .isEqualTo("COMPLETED");
+        return;
+      }
+      assertThat(Instant.now())
+          .withFailMessage(
+              "Timeout after %s\njobId: %s\nQuery: %s\nresponse body: %s",
+              timeout, jobId, query, responseBody)
+          .isBefore(deadline);
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
     }
-    return jobState;
   }
 
   private List<List<Object>> parseQueryResult(String jobId) throws IOException {
@@ -140,10 +160,7 @@ public class DremioHelper {
 
   private String awaitSqlJobResult(String query) throws IOException {
     String jobId = submitQueryAndGetJobId(query);
-    String jobStatus = waitForJobStatus(jobId);
-    assertThat("COMPLETED")
-        .withFailMessage("jobId: %s, jobStatus: %s\nQuery: %s", jobId, jobStatus, query)
-        .isEqualTo(jobStatus);
+    waitForJobCompletion(jobId, query);
     return jobId;
   }
 
