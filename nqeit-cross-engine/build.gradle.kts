@@ -31,7 +31,7 @@ dependencies {
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-spark-extension"))
   implementation(project(":nqeit-iceberg-flink-extension"))
-
+  implementation(project(":nqeit-iceberg-dremio-extension"))
   icebergSparkDependencies("implementation", crossEngine.sparkScala, project)
   icebergFlinkDependencies("implementation", crossEngine.flink)
 
@@ -40,6 +40,8 @@ dependencies {
   testRuntimeOnly(libs.junit.jupiter.engine)
   testRuntimeOnly(libs.logback.classic)
   testRuntimeOnly(libs.slf4j.log4j.over.slf4j)
+  testRuntimeOnly(libs.awssdk.bundle)
+  testRuntimeOnly(libs.awssdk.client)
 }
 
 // Note: Nessie-Quarkus server dependency and Projectnessie plugin are automatically configured,

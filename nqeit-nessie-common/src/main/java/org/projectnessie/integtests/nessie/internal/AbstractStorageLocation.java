@@ -73,6 +73,9 @@ abstract class AbstractStorageLocation implements CloseableResource {
   }
 
   public Path getPath() {
+    if (path == null) {
+      throw new IllegalStateException("given url is not a path: " + uri);
+    }
     return path;
   }
 
@@ -82,7 +85,10 @@ abstract class AbstractStorageLocation implements CloseableResource {
 
   @Override
   public void close() throws Throwable {
-    deleteRecursively(tempDir);
+    if (tempDir != null) {
+      deleteRecursively(tempDir);
+      tempDir = null;
+    }
   }
 
   private static void deleteRecursively(Path path) throws IOException {

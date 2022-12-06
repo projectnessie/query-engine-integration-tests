@@ -222,6 +222,57 @@ result in failures.
 
 However, using "standard Spark SQL" or "standard Spark Dataset/DataFrames/RDDs" works as expected.
 
+## Using Dremio
+The dremio integration tests requires a Base-URL, PAT(Personal Access Token), Project-id and the Catalog-name. If the following arguments are not provided, the tests will be skipped.
+
+### Example: Running the Dremio-Iceberg tests
+
+```bash
+./gradlew :nqeit-iceberg-dremio:intTest -PtestJvmArgs="\
+-Ddremio.url=<dremio-url> \
+-Ddremio.token=<token> \ 
+-Ddremio.project-id=<project-id> \ 
+-Ddremio.catalog-name=<catalog-name>
+```
+
+### Example: Running Dremio-iceberg tests with external Nessie Server
+
+```bash
+./gradlew :nqeit-iceberg-dremio:intTest \
+-PtestJvmArgs="\
+-Ddremio.url=<dremio-url> \
+-Ddremio.token=<token> \ 
+-Ddremio.project-id=<project-id> \ 
+-Ddremio.catalog-name=<catalog-name> \
+-Dnessie.client.uri=<nessie-uri> \ 
+-Dnessie.client.authentication.type=BEARER \
+-Dnessie.client.authentication.token=<token>"
+```
+
+### Example: Running Cross Engine tests for Spark, Flink and Dremio with external Nessie Server
+
+```bash
+# 1. Ensure that the following env variables are set: AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION
+# 2. AWS credentials are set in the Catalog Settings.
+# 3. Privileges(CREATE TABLE, DROP, INSERT and SELECT) are provided in the Catalog Settings.
+
+./gradlew :nqeit-cross-engine-3.2-2.12-1.14:intTest --tests "org.projectnessie.integtests.crossengine.ITCrossEngineDremio" -PtestJvmArgs="\
+-Dnessie.client.uri=<nessie-uri> \
+-Dnessie.client.authentication.type=BEARER \
+-Dnessie.client.authentication.token=<token> \
+-Dnessie.client.ref=<ref_name> \
+-Ddremio.url=<dremio-url> \
+-Ddremio.token=<token> \
+-Ddremio.project-id=<project-id> \
+-Ddremio.catalog-name=<catalog-name> \
+-Dnessie.inttest.location.iceberg.warehouse==s3://my-bucket \
+-Dnessie.client.io-impl=org.apache.iceberg.aws.s3.S3FileIO"
+```
+Note:
+1. `dremio-url` and `dremio-token` must be set according to the following documentation: [dremio-url and dremio-token](https://docs.dremio.com/cloud/api/)
+2. The `project-id` can be found on the Sonar Projects Setting page, under General Information named as "Project-ID".
+3. The `nessie-uri` and `catalog-name` can be found on the Catalog Settings page, under General Information named as "Catalog Endpoint" and "Catalog Name".
+
 ## For developers
 
 The recommended way to "link" this project to "latest Nessie" and "latest Iceberg" is to put those
