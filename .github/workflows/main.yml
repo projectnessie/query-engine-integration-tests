@@ -88,32 +88,32 @@ jobs:
       - name: Spotless
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: spotlessCheck
+          arguments: spotlessCheck --scan
 
       - name: Checkstyle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: checkstyleMain checkstyleTest
+          arguments: checkstyleMain checkstyleTest --scan
 
       - name: Iceberg Nessie test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :iceberg:iceberg-nessie:test
+          arguments: :iceberg:iceberg-nessie:test --scan
 
       - name: Nessie Spark 3.1 Extensions test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :nessie-iceberg:nessie-spark-extensions-3.1_2.12:test :nessie-iceberg:nessie-spark-extensions-3.1_2.12:intTest
+          arguments: :nessie-iceberg:nessie-spark-extensions-3.1_2.12:test :nessie-iceberg:nessie-spark-extensions-3.1_2.12:intTest --scan
 
       - name: Nessie Spark 3.2 / 2.12 Extensions test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :nessie-iceberg:nessie-spark-extensions-3.2_2.12:test :nessie-iceberg:nessie-spark-extensions-3.2_2.12:intTest
+          arguments: :nessie-iceberg:nessie-spark-extensions-3.2_2.12:test :nessie-iceberg:nessie-spark-extensions-3.2_2.12:intTest --scan
 
       - name: Nessie Spark 3.3 / 2.12 Extensions test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest
+          arguments: :nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest --scan
 
       - name: Stop Gradle daemon
         uses: gradle/gradle-build-action@v2
@@ -123,7 +123,7 @@ jobs:
       - name: Publish Nessie + Iceberg to local Maven repo
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: publishLocal
+          arguments: publishLocal --scan
 
       - name: Gather locally published versions
         run: |
@@ -151,7 +151,7 @@ jobs:
       - name: Tools & Integrations tests / Scala 2.12
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: intTest -DscalaVersion=2.12
+          arguments: intTest -DscalaVersion=2.12 --scan
 
       - name: Show Gradle projects for Scala 2.13
         uses: gradle/gradle-build-action@v2
@@ -161,7 +161,7 @@ jobs:
       - name: Tools & Integrations tests / Scala 2.13
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: intTest -DscalaVersion=2.13
+          arguments: intTest -DscalaVersion=2.13 --scan
 
       #- name: Checkout Presto repo
       #  uses: actions/checkout@v3
@@ -222,7 +222,7 @@ jobs:
       - name: Tools & Integrations tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: intTest -Dnessie.versionNessie=0.44.0 -Dnessie.versionIceberg=1.1.0
+          arguments: intTest -Dnessie.versionNessie=0.44.0 -Dnessie.versionIceberg=1.1.0 --scan
 
   iceberg10_nessie043:
     name: Nessie 0.43 / Iceberg 1.0
@@ -255,7 +255,7 @@ jobs:
       - name: Tools & Integrations tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: intTest -Dnessie.versionNessie=0.43.0 -Dnessie.versionIceberg=1.0.0
+          arguments: intTest -Dnessie.versionNessie=0.43.0 -Dnessie.versionIceberg=1.0.0 --scan
 
   iceberg10_nessie030:
     name: Nessie 0.30 / Iceberg 1.0
@@ -288,7 +288,7 @@ jobs:
       - name: Tools & Integrations tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: intTest -Dnessie.versionNessie=0.30.0 -Dnessie.versionIceberg=1.0.0
+          arguments: intTest -Dnessie.versionNessie=0.30.0 -Dnessie.versionIceberg=1.0.0 --scan
 
   iceberg014_nessie041:
     name: Nessie 0.41 / Iceberg 0.14
