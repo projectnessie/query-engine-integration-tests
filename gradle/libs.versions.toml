@@ -16,7 +16,7 @@ logback = "1.2.11"
 nessieBuildPlugins = "0.2.14"
 nessieRunPlugin = "0.28.1"
 slf4j = "1.7.36"
-spotlessPlugin = "6.12.0"
+spotlessPlugin = "6.12.1"
 testRerunPlugin = "0.1"
 
 [bundles]
