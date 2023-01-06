@@ -33,7 +33,7 @@ managed-slf4j = ["slf4j-jcl-over-slf4j", "slf4j-log4j-over-slf4j", "slf4j-jcl-ov
 junit-testing = ["assertj-core", "junit-jupiter-api", "junit-jupiter-params"]
 
 [libraries]
-assertj-core = { module = "org.assertj:assertj-core", version = "3.24.0" }
+assertj-core = { module = "org.assertj:assertj-core", version = "3.24.1" }
 awssdk-bundle = { module = "software.amazon.awssdk:bundle", version.ref = "awssdk"}
 awssdk-client = { module = "software.amazon.awssdk:url-connection-client", version.ref = "awssdk"}
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
