@@ -2,7 +2,7 @@
 awssdk = "2.19.17"
 checkstyle = "10.6.0"
 errorprone = "2.18.0"
-errorproneSlf4j = "0.1.17"
+errorproneSlf4j = "0.1.18"
 googleJavaFormat = "1.15.0"
 guava = "31.1-jre"
 hadoop = "3.3.4"
