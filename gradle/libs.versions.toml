@@ -1,5 +1,5 @@
 [versions]
-awssdk = "2.19.16"
+awssdk = "2.19.17"
 checkstyle = "10.6.0"
 errorprone = "2.18.0"
 errorproneSlf4j = "0.1.17"
