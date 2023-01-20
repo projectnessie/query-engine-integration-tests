@@ -22,6 +22,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.SourceSetContainer
@@ -32,6 +33,7 @@ import org.gradle.kotlin.dsl.DependencyHandlerScope
 import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.exclude
 import org.gradle.kotlin.dsl.extra
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withType
 
@@ -267,6 +269,15 @@ fun DependencyHandlerScope.icebergSparkDependencies(
   }
   add(configuration, "org.apache.spark:spark-hive_${sparkScala.scalaMajorVersion}") {
     forSpark(sparkScala.sparkVersion)
+  }
+
+  if (sparkScala.sparkMajorVersion == "3.3") {
+    val versionCatalog = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
+    val jacksonBomDep =
+      versionCatalog.findLibrary("jackson-bom").orElseThrow {
+        IllegalStateException("No library 'jackson-bom' defined in version catalog 'libs'")
+      }
+    add(configuration, platform(jacksonBomDep))
   }
 }
 
