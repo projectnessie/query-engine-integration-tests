@@ -50,6 +50,11 @@ jobs:
       - name: Checkout Integrations Testing repo
         uses: actions/checkout@v3
 
+      - name: Setup runner
+        uses: ./.github/actions/setup-runner
+        with:
+          more-memory: 'true'
+
       - name: Checkout and patch Nessie
         uses: ./.github/actions/patch-git
         with:
@@ -120,10 +125,13 @@ jobs:
         with:
           arguments: --stop
 
+      - name: Build before publish
+        run: |
+          ./gradlew -Dorg.gradle.jvmargs="-Xms2g -Xmx4g" jar testClasses javadoc --scan --no-daemon --no-watch-fs
+
       - name: Publish Nessie + Iceberg to local Maven repo
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishLocal --scan
+        run: |
+          ./gradlew -Dorg.gradle.jvmargs="-Xms2g -Xmx4g" publishLocal --scan --no-daemon --no-watch-fs
 
       - name: Gather locally published versions
         run: |

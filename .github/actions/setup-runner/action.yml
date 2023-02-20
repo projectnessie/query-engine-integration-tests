@@ -1,0 +1,46 @@
+name: 'Setup runner'
+description: 'Optionally adds swap space, prepares the runner machine'
+inputs:
+  more-memory:
+    description: 'Flag whether the workflow requires more memory (adds swap space)'
+    required: false
+    default: 'false'
+runs:
+  using: "composite"
+  steps:
+    - name: Memory report
+      shell: bash
+      run: |
+        echo "Memory and swap:"
+        free
+        echo
+        swapon --show
+        echo
+        echo "Available storage:"
+        df -h
+        echo
+    - name: Add 8G more swap for native-image build
+      if: ${{ inputs.more-memory != 'false' }}
+      shell: bash
+      run: |
+        sudo dd if=/dev/zero of=/mnt/swapfile-2 bs=1MiB count=$((8*1024))
+        sudo chmod 600 /mnt/swapfile-2
+        sudo mkswap /mnt/swapfile-2
+        sudo swapon /mnt/swapfile-2
+    - name: Memory report
+      if: ${{ inputs.more-memory != 'false' }}
+      shell: bash
+      run: |
+        echo "Memory report after adding more swap:"
+        free
+        echo
+        swapon --show
+        echo
+        echo "Available storage:"
+        df -h
+        echo
+
+    - name: Update /etc/hosts
+      shell: bash
+      run: echo -e "$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)\t$(hostname -f) $(hostname -s)" | sudo tee -a /etc/hosts
+
