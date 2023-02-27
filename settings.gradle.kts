@@ -241,6 +241,7 @@ fun loadNessieIcebergProjects(): Set<String> {
   }
   for (scalaVersion in allScalaVersions) {
     nessieIcebergProjects.add("nessie-spark-extensions-base_$scalaVersion")
+    nessieIcebergProjects.add("nessie-spark-extensions-basetests_$scalaVersion")
   }
   nessieIcebergProjects.add("nessie-spark-extensions-base")
   nessieIcebergProjects.add("nessie-spark-extensions")

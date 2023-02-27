@@ -37,8 +37,8 @@ jobs:
       ICEBERG_DIR: included-builds/iceberg
       ICEBERG_MAIN_REPOSITORY: apache/iceberg
       ICEBERG_MAIN_BRANCH: master
-      ICEBERG_PATCH_REPOSITORY: ''
-      ICEBERG_PATCH_BRANCH: ''
+      ICEBERG_PATCH_REPOSITORY: snazy/iceberg
+      ICEBERG_PATCH_BRANCH: iceberg-nesqueit
       SPARK_LOCAL_IP: localhost
 
     steps:
@@ -81,7 +81,7 @@ jobs:
       - name: Setup gradle.properties
         run: |
           mkdir -p ~/.gradle
-          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.jvmargs=-Xms2g -Xmx4g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
           echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
 
       - name: Set up JDK ${{ matrix.java-version }}
@@ -108,30 +108,27 @@ jobs:
       - name: Nessie Spark 3.1 Extensions test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :nessie-iceberg:nessie-spark-extensions-3.1_2.12:test :nessie-iceberg:nessie-spark-extensions-3.1_2.12:intTest --scan
+          arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.1_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.1_2.12:intTest --scan
 
       - name: Nessie Spark 3.2 / 2.12 Extensions test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :nessie-iceberg:nessie-spark-extensions-3.2_2.12:test :nessie-iceberg:nessie-spark-extensions-3.2_2.12:intTest --scan
+          arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.2_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.2_2.12:intTest --scan
 
       - name: Nessie Spark 3.3 / 2.12 Extensions test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest --scan
-
-      - name: Stop Gradle daemon
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: --stop
+          arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest --scan
 
       - name: Build before publish
-        run: |
-          ./gradlew -Dorg.gradle.jvmargs="-Xms2g -Xmx4g" jar testClasses javadoc --scan --no-daemon --no-watch-fs
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: jar testClasses javadoc --scan
 
       - name: Publish Nessie + Iceberg to local Maven repo
-        run: |
-          ./gradlew -Dorg.gradle.jvmargs="-Xms2g -Xmx4g" publishLocal --scan --no-daemon --no-watch-fs
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishLocal --scan
 
       - name: Gather locally published versions
         run: |
