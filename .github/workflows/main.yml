@@ -261,36 +261,3 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: intTest -Dnessie.versionNessie=0.43.0 -Dnessie.versionIceberg=1.0.0 --scan
-
-  iceberg10_nessie030:
-    name: Nessie 0.30 / Iceberg 1.0
-    runs-on: ubuntu-latest
-    env:
-      SPARK_LOCAL_IP: localhost
-
-    steps:
-      - name: Checkout Integrations Testing repo
-        uses: actions/checkout@v3
-
-      - name: Setup gradle.properties
-        run: |
-          mkdir -p ~/.gradle
-          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
-          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
-
-      - name: Set up JDK ${{ matrix.java-version }}
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 11
-
-      - name: Show Gradle projects
-        uses: gradle/gradle-build-action@v2
-        with:
-          cache-read-only: true
-          arguments: projects -Dnessie.versionNessie=0.30.0 -Dnessie.versionIceberg=1.0.0
-
-      - name: Tools & Integrations tests
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: intTest -Dnessie.versionNessie=0.30.0 -Dnessie.versionIceberg=1.0.0 --scan
