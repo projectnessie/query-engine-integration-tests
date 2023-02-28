@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.internal.artifacts.dependencies.DefaultImmutableVersionConstraint
 import org.gradle.internal.component.external.model.DefaultModuleComponentSelector
 import org.gradle.kotlin.dsl.provideDelegate
@@ -68,23 +69,35 @@ configurations.all {
               )
             useTarget(target, "Managed Iceberg version to $version (attributes: ${req.attributes})")
           }
-          if (
-            nessieVersionToUse != null &&
+
+          if (nessieVersionToUse != null) {
+            val newGroupIds = nessieVersionToUse.compareTo("0.50.0") > 0
+            var useGroupId =
+              if (!newGroupIds) "org.projectnessie"
+              else if (req.group != "org.projectnessie") req.group else "org.projectnessie.nessie"
+
+            if (
               (req.version.isEmpty() || req.version != nessieVersionToUse) &&
-              req.group == "org.projectnessie" &&
-              (req.module.startsWith("nessie") || req.module == "iceberg-views")
-          ) {
-            // TODO get rid of the internal Gradle classes DefaultImmutableVersionConstraint +
-            //  DefaultModuleComponentSelector.
-            val version = DefaultImmutableVersionConstraint.of(nessieVersionToUse)
-            val target =
-              DefaultModuleComponentSelector.newSelector(
-                req.moduleIdentifier,
-                version,
-                req.attributes,
-                req.requestedCapabilities
+                ((req.group == "org.projectnessie" ||
+                  req.group.startsWith("org.projectnessie.nessie")) || req.group != useGroupId) &&
+                (req.module.startsWith("nessie") || req.module == "iceberg-views")
+            ) {
+              // TODO get rid of the internal Gradle classes DefaultImmutableVersionConstraint +
+              //  DefaultModuleComponentSelector, once we can compeletely ignore the
+              //  "org.projectnessie" group-ID.
+              val version = DefaultImmutableVersionConstraint.of(nessieVersionToUse)
+              val target =
+                DefaultModuleComponentSelector.newSelector(
+                  DefaultModuleIdentifier.newId(useGroupId, req.module),
+                  version,
+                  req.attributes,
+                  req.requestedCapabilities
+                )
+              useTarget(
+                target,
+                "Managed Nessie version to $version (attributes: ${req.attributes})"
               )
-            useTarget(target, "Managed Nessie version to $version (attributes: ${req.attributes})")
+            }
           }
         }
       }

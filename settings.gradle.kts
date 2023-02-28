@@ -252,19 +252,32 @@ fun loadNessieIcebergProjects(): Set<String> {
 
 val nessieIcebergProjects = if (includeNessieBuild) loadNessieIcebergProjects() else setOf()
 
+val includedNessieVersion =
+  if (includeNessieBuild) file("$nessieSourceDir/version.txt").readText().trim() else "NONE"
+
 fun DependencySubstitution.manageNessieProjectDependency(
   includedBuildDesc: String,
   substitutions: DependencySubstitutions
 ): Boolean {
   val req = requested
-  if (req is ModuleComponentSelector && req.version.isEmpty()) {
+  if (req is ModuleComponentSelector) {
     if (
-      req.group == "org.projectnessie" &&
-        (req.module.startsWith("nessie") || req.module == "iceberg-views")
+      (req.group == "org.projectnessie.nessie" ||
+        req.group == "org.projectnessie.nessie-integrations" ||
+        (req.group == "org.projectnessie" && !req.module.startsWith("nessie-apprunner"))) &&
+        req.version.isEmpty()
     ) {
       val module = if (req.module == "nessie") "" else req.module
       val targetBuild =
         if (nessieIcebergProjects.contains(req.module)) "nessie-iceberg" else "nessie"
+
+      // project() doesn't handle included builds :(
+      // useTarget(project(":$targetBuild:$module"), "Project managed via $includedBuildDesc")
+
+      // GAV doesn't work, because GAV is not automatically resolved to a Gradle project :(
+      // useTarget(mapOf("group" to req.group, "name" to req.module, "version" to
+      // includedNessieVersion), "Version managed via $includedBuildDesc")
+
       val prx = projectFromIncludedBuild(targetBuild, ":$module")
       logger.info(
         "Substituting {}'s dependency to '{}:{}' as project '{}' in build '{}'",

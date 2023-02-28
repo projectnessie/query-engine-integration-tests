@@ -96,17 +96,18 @@ fun Project.nessieConfigureTestTasks() {
           add(
             "nessieQuarkusServer",
             mapOf(
-              "group" to "org.projectnessie",
+              "group" to "org.projectnessie.nessie",
               "name" to "nessie-quarkus",
               "configuration" to "quarkusRunner"
             )
           )
         } else {
           // Manage to specific Nessie version
+          val newGroupIds = nessieServerVersionToUse.compareTo("0.50.0") > 0
           add(
             "nessieQuarkusServer",
             mapOf(
-              "group" to "org.projectnessie",
+              "group" to if (newGroupIds) "org.projectnessie.nessie" else "org.projectnessie",
               "name" to "nessie-quarkus",
               "classifier" to "runner",
               "version" to nessieServerVersionToUse
