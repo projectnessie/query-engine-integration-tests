@@ -2,6 +2,7 @@
 awssdk = "2.20.14"
 checkstyle = "10.8.0"
 errorprone = "2.18.0"
+errorpronePlugin = "3.0.1"
 errorproneSlf4j = "0.1.18"
 googleJavaFormat = "1.16.0"
 guava = "31.1-jre"
@@ -15,6 +16,7 @@ junit = "5.9.2"
 logback = "1.2.11"
 nessieBuildPlugins = "0.2.20"
 nessieRunPlugin = "0.29.0"
+shadowPlugin = "8.1.0"
 slf4j = "1.7.36"
 spotlessPlugin = "6.16.0"
 testRerunPlugin = "0.1"
@@ -39,10 +41,12 @@ awssdk-client = { module = "software.amazon.awssdk:url-connection-client", versi
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
 errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+errorprone-plugin = { module = "net.ltgt.gradle:gradle-errorprone-plugin", version.ref = "errorpronePlugin" }
 errorprone-slf4j = { module = "jp.skypencil.errorprone.slf4j:errorprone-slf4j", version.ref = "errorproneSlf4j" }
 findbugs-jsr305 = { module = "com.google.code.findbugs:jsr305", version = "3.0.2" }
 google-java-format = { module = "com.google.googlejavaformat:google-java-format", version.ref = "googleJavaFormat" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
+idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext", version = "1.1.7" }
 immutables-builder = { module = "org.immutables:builder", version.ref = "immutables" }
 immutables-value-annotations = { module = "org.immutables:value-annotations", version.ref = "immutables" }
 immutables-value-fixture = { module = "org.immutables:value-fixture", version.ref = "immutables" }
@@ -52,6 +56,7 @@ jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
 jandex = { module = "org.jboss:jandex", version.ref = "jandex" }
+jandex-plugin = { module = "com.github.vlsi.gradle:jandex-plugin", version.ref = "jandexPlugin" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "24.0.0" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
@@ -63,19 +68,18 @@ logback-access = { module = "ch.qos.logback:logback-access", version.ref = "logb
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 microprofile-openapi = { module = "org.eclipse.microprofile.openapi:microprofile-openapi-api", version = "3.1" }
+nessie-runner-plugin = { module = "org.projectnessie:org.projectnessie.gradle.plugin", version.ref = "nessieRunPlugin" }
+shadow-plugin = { module = "com.github.johnrengelman:shadow", version.ref = "shadowPlugin" }
 slf4j-api = {  module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-jcl-over-slf4j = { module = "org.slf4j:jcl-over-slf4j", version.ref = "slf4j" }
 slf4j-log4j-over-slf4j = { module = "org.slf4j:log4j-over-slf4j", version.ref = "slf4j" }
+spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotlessPlugin" }
+test-rerun-plugin = { module = "org.caffinitas.gradle.testrerun:gradle-test-rerun", version.ref = "testRerunPlugin" }
 
 [plugins]
 errorprone = { id = "net.ltgt.errorprone", version = "3.0.1" }
 idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version = "1.1.7" }
 jandex = { id = "com.github.vlsi.jandex", version.ref = "jandexPlugin" }
-nessie-build-checkstyle = { id = "org.projectnessie.buildsupport.checkstyle", version.ref = "nessieBuildPlugins" }
-nessie-build-errorprone = { id = "org.projectnessie.buildsupport.errorprone", version.ref = "nessieBuildPlugins" }
-nessie-build-ide-integration = { id = "org.projectnessie.buildsupport.ide-integration", version.ref = "nessieBuildPlugins" }
-nessie-build-jandex = { id = "org.projectnessie.buildsupport.jandex", version.ref = "nessieBuildPlugins" }
-nessie-build-spotless = { id = "org.projectnessie.buildsupport.spotless", version.ref = "nessieBuildPlugins" }
 nessie-run = { id = "org.projectnessie", version.ref = "nessieRunPlugin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotlessPlugin" }
 test-rerun = { id = "org.caffinitas.gradle.testrerun:gradle-test-rerun", version.ref = "testRerunPlugin" }

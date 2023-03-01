@@ -16,10 +16,7 @@
 
 import org.gradle.api.internal.tasks.TaskDependencyContainer
 
-plugins {
-  id("org.projectnessie.buildsupport.ide-integration")
-  `tools-integrations-conventions`
-}
+plugins { `tools-integrations-conventions` }
 
 mapOf(
     "versionCheckstyle" to libs.versions.checkstyle.get(),

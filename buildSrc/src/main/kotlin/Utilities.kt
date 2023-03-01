@@ -78,6 +78,16 @@ fun Project.forceJava11ForTests() {
   }
 }
 
+fun Project.libsRequiredVersion(name: String): String {
+  val libVer =
+    extensions.getByType<VersionCatalogsExtension>().named("libs").findVersion(name).get()
+  val reqVer = libVer.requiredVersion
+  check(reqVer.isNotEmpty()) {
+    "libs-version for '$name' is empty, but must not be empty, version. strict: ${libVer.strictVersion}, required: ${libVer.requiredVersion}, preferred: ${libVer.preferredVersion}"
+  }
+  return reqVer
+}
+
 fun Project.dependencyVersion(key: String) = rootProject.extra[key].toString()
 
 fun Project.testLogLevel() =
@@ -327,7 +337,7 @@ fun DependencyHandlerScope.prestoDependencies(configuration: String, presto: Pre
   add(configuration, "com.facebook.presto:presto-iceberg:${presto.prestoVersion}")
 
   add(
-    "test${configuration.capitalize()}",
+    "test${configuration.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}",
     "com.facebook.presto:presto-tests:${presto.prestoVersion}"
   )
 }
