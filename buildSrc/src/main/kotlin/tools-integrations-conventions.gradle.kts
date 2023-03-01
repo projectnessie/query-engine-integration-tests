@@ -81,7 +81,6 @@ configurations.all {
             nessieVersionToUse != null &&
               (req.version.isEmpty() || req.version != nessieVersionToUse) &&
               req.group == "org.projectnessie" &&
-              req.module != "nessie-antlr-runtime" &&
               (req.module.startsWith("nessie") || req.module == "iceberg-views")
           ) {
             // TODO get rid of the internal Gradle classes DefaultImmutableVersionConstraint +

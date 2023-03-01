@@ -260,8 +260,7 @@ fun DependencySubstitution.manageNessieProjectDependency(
   if (req is ModuleComponentSelector && req.version.isEmpty()) {
     if (
       req.group == "org.projectnessie" &&
-        (req.module.startsWith("nessie") || req.module == "iceberg-views") &&
-        req.module != "nessie-antlr-runtime"
+        (req.module.startsWith("nessie") || req.module == "iceberg-views")
     ) {
       val module = if (req.module == "nessie") "" else req.module
       val targetBuild =
