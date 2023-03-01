@@ -26,17 +26,12 @@ repositories {
 
 dependencies {
   implementation(gradleKotlinDsl())
-  val ver = libs.versions
-  implementation("com.diffplug.spotless:spotless-plugin-gradle:${ver.spotlessPlugin.get()}")
-  implementation("com.github.vlsi.gradle:jandex-plugin:${ver.jandexPlugin.get()}")
-  implementation("org.caffinitas.gradle.testrerun:gradle-test-rerun:${ver.testRerunPlugin.get()}")
-  implementation("org.projectnessie:quarkus-apprunner:${ver.nessieRunPlugin.get()}")
-  val nessieVer = ver.nessieBuildPlugins.get()
-  implementation("org.projectnessie.buildsupport:checkstyle:$nessieVer")
-  implementation("org.projectnessie.buildsupport:errorprone:$nessieVer")
-  implementation("org.projectnessie.buildsupport:ide-integration:$nessieVer")
-  implementation("org.projectnessie.buildsupport:jandex:$nessieVer")
-  implementation("org.projectnessie.buildsupport:spotless:$nessieVer")
+  implementation(libs.idea.ext)
+  implementation(libs.errorprone.plugin)
+  implementation(libs.spotless.plugin)
+  implementation(libs.jandex.plugin)
+  implementation(libs.test.rerun.plugin)
+  implementation(libs.nessie.runner.plugin)
 }
 
 java {
