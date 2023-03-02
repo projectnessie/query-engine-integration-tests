@@ -32,8 +32,8 @@ jobs:
       NESSIE_DIR: included-builds/nessie
       NESSIE_MAIN_REPOSITORY: projectnessie/nessie
       NESSIE_MAIN_BRANCH: main
-      NESSIE_PATCH_REPOSITORY: ''
-      NESSIE_PATCH_BRANCH: ''
+      NESSIE_PATCH_REPOSITORY: snazy/nessie
+      NESSIE_PATCH_BRANCH: group-ids-refactor-nessie
       ICEBERG_DIR: included-builds/iceberg
       ICEBERG_MAIN_REPOSITORY: apache/iceberg
       ICEBERG_MAIN_BRANCH: master
@@ -125,10 +125,13 @@ jobs:
         with:
           arguments: jar testClasses javadoc --scan
 
-      - name: Publish Nessie + Iceberg to local Maven repo
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishLocal --scan
+      # TODO re-enable once Iceberg/master references a Nessie release w/ Nessie PR #6197,
+      #   Gradle's Maven publishing fails with the group-ID relocation.
+      #
+      #- name: Publish Nessie + Iceberg to local Maven repo
+      #  uses: gradle/gradle-build-action@v2
+      #  with:
+      #    arguments: publishLocal --scan
 
       - name: Gather locally published versions
         run: |
