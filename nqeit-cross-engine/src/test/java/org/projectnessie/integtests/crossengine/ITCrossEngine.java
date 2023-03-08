@@ -35,16 +35,31 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
 import org.projectnessie.integtests.flink.Flink;
 import org.projectnessie.integtests.flink.FlinkHelper;
 import org.projectnessie.integtests.flink.IcebergFlinkExtension;
 import org.projectnessie.integtests.iceberg.spark.IcebergSparkExtension;
 import org.projectnessie.integtests.iceberg.spark.Spark;
+import org.projectnessie.integtests.nessie.NessieAPI;
+import org.projectnessie.integtests.nessie.NessieDefaultBranch;
 import org.projectnessie.integtests.nessie.NessieTestsExtension;
 
 @ExtendWith({IcebergSparkExtension.class, IcebergFlinkExtension.class, NessieTestsExtension.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ITCrossEngine {
+
+  @Order(20)
+  @Test
+  public void createNamespace(@NessieAPI NessieApiV1 nessie, @NessieDefaultBranch String branch)
+      throws Exception {
+    try {
+      nessie.createNamespace().namespace("db").refName(branch).create();
+    } catch (NessieNamespaceAlreadyExistsException ignore) {
+      // ignore
+    }
+  }
 
   @Order(100)
   @Test

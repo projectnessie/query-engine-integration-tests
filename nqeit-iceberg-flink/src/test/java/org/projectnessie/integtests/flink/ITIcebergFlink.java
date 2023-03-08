@@ -23,11 +23,27 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
+import org.projectnessie.integtests.nessie.NessieAPI;
+import org.projectnessie.integtests.nessie.NessieDefaultBranch;
 import org.projectnessie.integtests.nessie.NessieTestsExtension;
 
 @ExtendWith({NessieTestsExtension.class, IcebergFlinkExtension.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ITIcebergFlink {
+
+  @Order(20)
+  @Test
+  public void createNamespace(
+      @NessieAPI NessieApiV1 nessie, @NessieDefaultBranch String branch, @Flink FlinkHelper flink)
+      throws Exception {
+    try {
+      nessie.createNamespace().namespace(flink.databaseName()).refName(branch).create();
+    } catch (NessieNamespaceAlreadyExistsException ignore) {
+      // ignore
+    }
+  }
 
   @Order(100)
   @Test
