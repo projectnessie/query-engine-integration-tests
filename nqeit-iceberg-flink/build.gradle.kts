@@ -26,6 +26,7 @@ dependencies {
   compileOnly(platform(rootProject))
   testCompileOnly(platform(rootProject))
 
+  implementation("org.projectnessie:nessie-client")
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-flink-extension"))
   compileOnly(libs.findbugs.jsr305)

@@ -25,6 +25,8 @@ import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
 import org.projectnessie.integtests.dremio.DremioHelper;
 import org.projectnessie.integtests.dremio.IcebergDremioExtension;
 import org.projectnessie.integtests.flink.Flink;
@@ -32,6 +34,8 @@ import org.projectnessie.integtests.flink.FlinkHelper;
 import org.projectnessie.integtests.flink.IcebergFlinkExtension;
 import org.projectnessie.integtests.iceberg.spark.IcebergSparkExtension;
 import org.projectnessie.integtests.iceberg.spark.Spark;
+import org.projectnessie.integtests.nessie.NessieAPI;
+import org.projectnessie.integtests.nessie.NessieDefaultBranch;
 import org.projectnessie.integtests.nessie.NessieTestsExtension;
 
 @ExtendWith({
@@ -48,7 +52,18 @@ public class ITCrossEngineDremio {
 
   @BeforeAll
   public static void setupEngines(
-      @Spark SparkSession spark, @Flink FlinkHelper flink, DremioHelper dremioHelper) {
+      @Spark SparkSession spark,
+      @Flink FlinkHelper flink,
+      @NessieAPI NessieApiV1 nessie,
+      @NessieDefaultBranch String branch,
+      DremioHelper dremioHelper)
+      throws Exception {
+    try {
+      nessie.createNamespace().namespace("db").refName(branch).create();
+    } catch (NessieNamespaceAlreadyExistsException ignore) {
+      // ignore
+    }
+
     ITCrossEngineDremio.spark = spark;
     ITCrossEngineDremio.flink = flink;
     ITCrossEngineDremio.dremioHelper = dremioHelper;

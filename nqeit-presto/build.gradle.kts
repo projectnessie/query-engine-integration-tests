@@ -24,6 +24,8 @@ val presto = getPrestoVersionsForProject()
 
 dependencies {
   implementation(platform(rootProject))
+
+  implementation("org.projectnessie:nessie-client")
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-presto-extension"))
 

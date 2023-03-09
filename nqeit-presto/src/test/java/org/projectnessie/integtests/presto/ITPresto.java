@@ -26,11 +26,31 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
+import org.projectnessie.integtests.nessie.NessieAPI;
+import org.projectnessie.integtests.nessie.NessieDefaultBranch;
 import org.projectnessie.integtests.nessie.NessieTestsExtension;
 
 @ExtendWith({PrestoJdbcExtension.class, NessieTestsExtension.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ITPresto {
+
+  @Order(20)
+  @Test
+  public void createNamespace(@NessieAPI NessieApiV1 nessie, @NessieDefaultBranch String branch)
+      throws Exception {
+    try {
+      nessie.createNamespace().namespace("db").refName(branch).create();
+    } catch (NessieNamespaceAlreadyExistsException ignore) {
+      // ignore
+    }
+    try {
+      nessie.createNamespace().namespace("from_presto").refName(branch).create();
+    } catch (NessieNamespaceAlreadyExistsException ignore) {
+      // ignore
+    }
+  }
 
   @Order(102)
   @Test
