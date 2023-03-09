@@ -57,7 +57,7 @@ query engine versions in combination with Iceberg + Nessie. For example: For Nes
 Iceberg 0.14, 5 Gradle projects with Spark 3.1, 3.2, 3.3, and Scala 2.12 + 2.13 are created
 (Spark 3.1 is only supported with Scala 2.12). Similar for Flink, 2 Gradle projects with Flink 1.14
 and 1.15 are created.
-Use `./gradlew projects -Dnessie.versionNessie=0.40.1 -Dnessie.versionIceberg=0.14.0` to see the
+Use `./gradlew projects -Dnessie.versionNessie=0.50.0 -Dnessie.versionIceberg=1.1.0` to see the
 list of projects available for those released versions. 
 
 Tests for each query engine (Spark, Flink, Presto) use the same test code, so a lot of code
@@ -126,9 +126,9 @@ necessary to rerun tests. There are two options:
 ```bash
 ./gradlew\
   :nqeit-iceberg-spark-3.1:intTest\
-  :nqeit-iceberg-spark-3.2:intTest\
-  -Dnessie.versionNessie=0.30.0\
-  -Dnessie.versionIceberg=0.14.0
+  :nqeit-iceberg-spark-3.2_2.13:intTest\
+  -Dnessie.versionNessie=0.50.0\
+  -Dnessie.versionIceberg=1.1.0
 ```
 
 ### Example: Using Nessie from a Git worktree + released Iceberg version
@@ -138,8 +138,8 @@ necessary to rerun tests. There are two options:
 ```bash
 ./gradlew\
   :nqeit-iceberg-spark-3.1:intTest\
-  :nqeit-iceberg-spark-3.2:intTest\
-  -Dnessie.versionIceberg=0.14.0
+  :nqeit-iceberg-spark-3.2_2.13:intTest\
+  -Dnessie.versionIceberg=1.1.0
 ```
 
 ### Example: Using an external Spark cluster + Nessie server from Git clone
@@ -232,7 +232,7 @@ The dremio integration tests requires a Base-URL, PAT(Personal Access Token), Pr
 -Ddremio.url=<dremio-url> \
 -Ddremio.token=<token> \ 
 -Ddremio.project-id=<project-id> \ 
--Ddremio.catalog-name=<catalog-name>
+-Ddremio.catalog-name=<catalog-name>"
 ```
 
 ### Example: Running Dremio-iceberg tests with external Nessie Server
@@ -287,41 +287,39 @@ we maintain "integrations branches" with the necessary changes.
 
 Notes:
 * including Nessie source builds only works with Nessie built with Gradle.
-* including Iceberg source builds only works with recent Iceberg from the master branch.
+* including Iceberg source builds with Git worktrees **will NOT work anymore for recent versions of Iceberg >= 1.1.0**.
+  This is because the Iceberg build now requires a Gradle plugin that is not compatible with worktrees, see [this
+  issue](https://github.com/n0mer/gradle-git-properties/issues/14) for more details.
 
 The easiest way to implement this locally is to use [Git worktree](https://git-scm.com/docs/git-worktree).
 
 1. Clone this repository and save the path in `NESSIE_INTEGRATION_TESTS`
    ```shell
-   git clone https://github.com/projectnessie/nessie-integration-tests
-   NESSIE_INTEGRATION_TESTS=$(realpath nessie-integration-tests)
+   git clone https://github.com/projectnessie/query-engine-integration-tests
+   NESSIE_INTEGRATION_TESTS=$(realpath query-engine-integration-tests)
    ```
 2. Go to your local Nessie clone and create a Git worktree in the [`included-builds/`](included-builds)
    directory.
    ```shell
    cd PATH_TO_YOUR_LOCAL_NESSIE_CLONE
-   git branch -b integ-bump/iceberg origin/integ-bump/iceberg
-   git worktree add ${NESSIE_INTEGRATION_TESTS}/included-builds/nessie integ-bump/iceberg
+   git worktree add --track -b integ-tests-main ${NESSIE_INTEGRATION_TESTS}/included-builds/nessie origin/main
    ```
 3. Go to your local Iceberg clone and create a Git worktree in the [`included-builds/`](included-builds)
    directory.
    ```shell
    cd PATH_TO_YOUR_LOCAL_ICEBERG_CLONE
-   git branch -b master-nessie origin/master
-   git worktree add ${NESSIE_INTEGRATION_TESTS}/included-builds/iceberg master-nessie
+   git worktree add --track -b integ-tests-master ${NESSIE_INTEGRATION_TESTS}/included-builds/iceberg origin/master
    ```
-   Note: the above example uses a Git worktree with a branch "detached" from the
-   origin's `master` branch. As long as there are no code changes necessary, it might be way more
-   convenient to just create a symbolic link to your local Iceberg clone containing the already
-   checked out `master` branch.
 
 #### Symbolic links
 
-**DISCLAIMER** Including the Nessie build does **not** work correctly in IntelliJ!
-Do _always_ use a Git worktree (or Git clone) as discussed above.
-
 As an alternative, you can also create symbolic links called `nessie` and `iceberg` to your local
-clones/worktrees with the "right" code. Example:
+clones/worktrees with the "right" code.
+
+Symlinks are less convenient than worktrees, especially if code changes are necessary, but they are currently the only
+alternative that works with recent versions of Iceberg.
+
+Example:
 ```shell
 ln -s INSERT_PATH_TO_YOUR_LOCAL_NESSIE_CLONE included-builds/nessie
 ln -s INSERT_PATH_TO_YOUR_LOCAL_ICEBERG_CLONE included-builds/iceberg
@@ -331,7 +329,7 @@ ln -s INSERT_PATH_TO_YOUR_LOCAL_ICEBERG_CLONE included-builds/iceberg
 
 Canary build:
 ```bash
-./gradlew :nessie:clients:client:jar :iceberg:iceberg-nessie:jar :iceberg:iceberg-core:jar
+./gradlew :nessie:nessie-client:jar :iceberg:iceberg-core:jar :iceberg:iceberg-nessie:jar 
 ```
 
 Run Iceberg/Nessie tests:
