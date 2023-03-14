@@ -227,7 +227,7 @@ fun loadNessieIcebergProjects(): Set<String> {
     nessieIcebergProjects.add(it.toString())
   }
 
-  val sparkScala = loadProperties(file("$nessieSourceDir/clients/spark-scala.properties"))
+  val sparkScala = loadProperties(file("$nessieSourceDir/integrations/spark-scala.properties"))
   val allScalaVersions = LinkedHashSet<String>()
   for (sparkVersion in sparkScala["sparkVersions"].toString().split(",")) {
     val scalaVersions =
