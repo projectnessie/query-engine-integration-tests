@@ -19,9 +19,15 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.errorprone.annotations.FormatMethod;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,9 +52,24 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
 })
 public class ITCrossEngineDremio {
 
+  private static final String NAMESPACE = "db";
+  private static final String DREMIO_TABLE = "from_dremio";
+  private static final String SPARK_TABLE = "from_spark";
+  private static final String FLINK_TABLE = "from_flink";
+
   private static SparkSession spark;
   private static FlinkHelper flink;
   private static DremioHelper dremioHelper;
+
+  @FormatMethod
+  private static Dataset<Row> sparkSql(@Language("SQL") String query, Object... args) {
+    String fullQuery = format(query, args);
+    try {
+      return spark.sql(fullQuery);
+    } catch (Exception e) {
+      throw new RuntimeException("Spark failed to run SQL: " + fullQuery, e);
+    }
+  }
 
   @BeforeAll
   public static void setupEngines(
@@ -59,7 +80,7 @@ public class ITCrossEngineDremio {
       DremioHelper dremioHelper)
       throws Exception {
     try {
-      nessie.createNamespace().namespace("db").refName(branch).create();
+      nessie.createNamespace().namespace(NAMESPACE).refName(branch).create();
     } catch (NessieNamespaceAlreadyExistsException ignore) {
       // ignore
     }
@@ -68,23 +89,38 @@ public class ITCrossEngineDremio {
     ITCrossEngineDremio.flink = flink;
     ITCrossEngineDremio.dremioHelper = dremioHelper;
 
-    spark.sql("DROP TABLE IF EXISTS nessie.db.from_spark");
-    spark.sql("DROP TABLE IF EXISTS nessie.db.from_dremio");
-    spark.sql("DROP TABLE IF EXISTS nessie.db.from_flink");
+    Stream.of(SPARK_TABLE, DREMIO_TABLE, FLINK_TABLE)
+        .forEach(x -> sparkSql("DROP TABLE IF EXISTS %s", sparkTable(x)));
+  }
+
+  private static String sparkTable(String tableName) {
+    String sparkCatalogName = "nessie"; // see IcebergSparkExtension
+    return String.join(".", sparkCatalogName, NAMESPACE, tableName);
+  }
+
+  private static String dremioTable(String tableName) {
+    return Stream.of(dremioHelper.getCatalogName(), NAMESPACE, tableName)
+        .map(x -> '"' + x + '"')
+        .collect(Collectors.joining("."));
+  }
+
+  private static String flinkTable(String tableName) {
+    assertThat(NAMESPACE).isEqualTo(flink.databaseName());
+    return flink.qualifiedTableName(tableName);
   }
 
   private void runInsertTests(String testTable) {
     List<List<Object>> tableRows = new ArrayList<>();
 
-    spark.sql(format("INSERT INTO nessie.db.%s VALUES (123, 'foo')", testTable));
+    sparkSql("INSERT INTO %s VALUES (123, 'foo')", sparkTable(testTable));
     tableRows.add(asList(123, "foo"));
     assertSelectFromEngines(tableRows, testTable);
 
-    dremioHelper.runQuery(format("INSERT INTO %s VALUES (456,'bar')", testTable));
+    dremioHelper.runQuery("INSERT INTO %s VALUES (456,'bar')", dremioTable(testTable));
     tableRows.add(asList(456, "bar"));
     assertSelectFromEngines(tableRows, testTable);
 
-    flink.sql("INSERT INTO %s (id, val) VALUES (789, 'cool')", flink.qualifiedTableName(testTable));
+    flink.sql("INSERT INTO %s (id, val) VALUES (789, 'cool')", flinkTable(testTable));
     tableRows.add(asList(789, "cool"));
     assertSelectFromEngines(tableRows, testTable);
   }
@@ -95,11 +131,11 @@ public class ITCrossEngineDremio {
     tableRows.add(asList(456, "bar"));
     tableRows.add(asList(789, "cool"));
 
-    spark.sql(format("DELETE FROM nessie.db.%s WHERE id=123 AND val='foo'", testTable));
+    sparkSql("DELETE FROM %s WHERE id=123 AND val='foo'", sparkTable(testTable));
     tableRows.remove(asList(123, "foo"));
     assertSelectFromEngines(tableRows, testTable);
 
-    dremioHelper.runQuery(format("DELETE FROM %s WHERE id=456 and val='bar'", testTable));
+    dremioHelper.runQuery("DELETE FROM %s WHERE id=456 and val='bar'", dremioTable(testTable));
     tableRows.remove(asList(456, "bar"));
     assertSelectFromEngines(tableRows, testTable);
 
@@ -108,23 +144,21 @@ public class ITCrossEngineDremio {
 
   private static void selectFromSpark(List<List<Object>> tableRows, String testTable) {
     assertThat(
-            spark
-                .sql(format("SELECT id, val FROM nessie.db.%s", testTable))
-                .collectAsList()
-                .stream()
+            sparkSql("SELECT id, val FROM %s", sparkTable(testTable)).collectAsList().stream()
                 .map(r -> asList(r.get(0), r.get(1))))
         .containsExactlyInAnyOrderElementsOf(tableRows);
   }
 
   private static void selectFromFlink(List<List<Object>> tableRows, String testTable) {
-    assertThat(flink.sql("SELECT * FROM %s", flink.qualifiedTableName(testTable)))
+    assertThat(flink.sql("SELECT * FROM %s", flinkTable(testTable)))
         .hasSize(tableRows.size())
         .map(r -> asList(r.getField(0), r.getField(1)))
         .containsExactlyInAnyOrderElementsOf(tableRows);
   }
 
   private static void selectFromDremio(List<List<Object>> tableRows, String testTable) {
-    List<List<Object>> rows = dremioHelper.runSelectQuery(format("SELECT * FROM %s", testTable));
+    List<List<Object>> rows =
+        dremioHelper.runSelectQuery("SELECT * FROM %s", dremioTable(testTable));
     assertThat(rows).containsExactlyInAnyOrderElementsOf(tableRows);
   }
 
@@ -136,24 +170,24 @@ public class ITCrossEngineDremio {
 
   @Test
   public void testDremioTable() {
-    String testTable = "from_dremio";
-    dremioHelper.runQuery(format("CREATE TABLE %s (id INT, val VARCHAR)", testTable));
+    String testTable = DREMIO_TABLE;
+    dremioHelper.runQuery("CREATE TABLE %s (id INT, val VARCHAR)", dremioTable(testTable));
     runInsertTests(testTable);
     runDeleteTests(testTable);
   }
 
   @Test
   public void testSparkTable() {
-    String testTable = "from_spark";
-    spark.sql(format("CREATE TABLE nessie.db.%s (id int, val string)", testTable));
+    String testTable = SPARK_TABLE;
+    sparkSql("CREATE TABLE %s (id int, val string)", sparkTable(testTable));
     runInsertTests(testTable);
     runDeleteTests(testTable);
   }
 
   @Test
   public void testFlinkTable() {
-    String testTable = "from_flink";
-    flink.sql("CREATE TABLE %s (id INT, val STRING)", flink.qualifiedTableName(testTable));
+    String testTable = FLINK_TABLE;
+    flink.sql("CREATE TABLE %s (id INT, val STRING)", flinkTable(testTable));
     runInsertTests(testTable);
     runDeleteTests(testTable);
   }

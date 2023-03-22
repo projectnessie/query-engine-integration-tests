@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.errorprone.annotations.FormatMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,29 +39,41 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.intellij.lang.annotations.Language;
 
 public class DremioHelper {
   private String token;
-  private String projectId;
-  private String baseUrl;
+  private String projectUrl;
   private String catalogName;
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private static JsonNode parseJson(String json) throws IOException {
-    return OBJECT_MAPPER.readTree(json);
+  private static JsonNode parseJson(String json, String url) {
+    try {
+      return OBJECT_MAPPER.readTree(json);
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          "Failed to parse Response from " + url + " as JSON:\n" + json, e);
+    }
   }
 
-  DremioHelper(String projectId, String token, String baseUrl, String catalogName) {
-    this.projectId = projectId;
+  DremioHelper(String token, String baseUrl, String projectId, String catalogName) {
     this.token = token;
-    this.baseUrl = baseUrl;
+    if (baseUrl.contains("://app.")) {
+      baseUrl = baseUrl.replaceFirst("://app.", "://api.");
+    }
+    this.projectUrl = baseUrl + "/v0/projects/" + projectId;
     this.catalogName = catalogName;
+  }
+
+  public String getCatalogName() {
+    return catalogName;
   }
 
   private String createPayload(String query) throws JsonProcessingException {
     Map<String, Object> payload = new HashMap<>();
     payload.put("sql", query);
+    // TODO: for some reason this no longer works and we have to use fully qualified table names
     payload.put("context", asList(catalogName, "db"));
     return OBJECT_MAPPER.writeValueAsString(payload);
   }
@@ -102,8 +115,7 @@ public class DremioHelper {
   private void waitForJobCompletion(String jobId, String query) throws IOException {
     // The doc for getting the job status for cloud is not there, but it is similar to software
     // See docs: https://docs.dremio.com/software/rest-api/jobs/get-job/
-    String jobState = "RUNNING";
-    String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId;
+    String url = projectUrl + "/job/" + jobId;
     Set<String> finalJobStates = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
     // Default Timeout for engine-startup is 5min
     Duration timeout = Duration.ofMinutes(5);
@@ -111,8 +123,8 @@ public class DremioHelper {
 
     while (true) {
       String responseBody = performHttpRequest(url, null);
-      JsonNode node = parseJson(responseBody);
-      jobState = node.get("jobState").textValue();
+      JsonNode node = parseJson(responseBody, url);
+      String jobState = node.get("jobState").textValue();
       if (finalJobStates.contains(jobState)) {
         assertThat(jobState)
             .withFailMessage("jobId: %s\nQuery: %s\nresponse body: %s", jobId, query, responseBody)
@@ -132,13 +144,12 @@ public class DremioHelper {
     }
   }
 
-  private List<List<Object>> parseQueryResult(String jobId) throws IOException {
-    // The doc for getting the job results for cloud is not there, but it is similar to software
-    // See docs: https://docs.dremio.com/software/rest-api/jobs/get-job/
-    String url = baseUrl + "/v0/projects/" + projectId + "/job/" + jobId + "/results";
+  private List<List<Object>> fetchQueryResult(String jobId) throws IOException {
+    // See docs: https://docs.dremio.com/cloud/api/job/
+    String url = projectUrl + "/job/" + jobId + "/results";
     String result = performHttpRequest(url, null);
 
-    JsonNode node = parseJson(result);
+    JsonNode node = parseJson(result, url);
     int noOfRows = node.get("rowCount").intValue();
     ArrayNode arrayNode = (ArrayNode) node.get("rows");
     List<List<Object>> list = new ArrayList<>();
@@ -152,10 +163,14 @@ public class DremioHelper {
   private String submitQueryAndGetJobId(String query) throws IOException {
     // See docs: https://docs.dremio.com/cloud/api/sql/
     String payload = createPayload(query);
-    String url = baseUrl + "/v0/projects/" + projectId + "/sql";
+    String url = projectUrl + "/sql";
     String result = performHttpRequest(url, payload);
-    JsonNode node = parseJson(result);
-    return node.get("id").textValue();
+    JsonNode node = parseJson(result, url);
+    JsonNode idNode = node.get("id");
+    if (idNode == null) {
+      throw new IOException("Failed to get job ID from response:\n" + result);
+    }
+    return idNode.textValue();
   }
 
   private String awaitSqlJobResult(String query) throws IOException {
@@ -164,20 +179,24 @@ public class DremioHelper {
     return jobId;
   }
 
-  public List<List<Object>> runSelectQuery(String query) {
+  @FormatMethod
+  public List<List<Object>> runSelectQuery(@Language("SQL") String query, Object... args) {
+    String jobId = runQuery(query, args);
     try {
-      String jobId = awaitSqlJobResult(query);
-      return parseQueryResult(jobId);
+      return fetchQueryResult(jobId);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
   }
 
-  public void runQuery(String query) {
+  /** Returns the id of the finished dremio job. */
+  @FormatMethod
+  public String runQuery(@Language("SQL") String query, Object... args) {
+    String fullQuery = String.format(query, args);
     try {
-      awaitSqlJobResult(query);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
+      return awaitSqlJobResult(fullQuery);
+    } catch (Exception e) {
+      throw new RuntimeException("Dremio failed to run SQL: " + fullQuery, e);
     }
   }
 }

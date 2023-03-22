@@ -126,6 +126,7 @@ public class IcebergFlinkExtension implements ParameterResolver {
           IcebergWarehouse.get(extensionContext).getUri().toString());
 
       sql("CREATE CATALOG %s WITH %s", catalogName(), toWithClause(config));
+      sql("CREATE DATABASE IF NOT EXISTS %s.%s", catalogName(), databaseName());
     }
 
     static String toWithClause(Map<String, String> props) {
@@ -173,7 +174,12 @@ public class IcebergFlinkExtension implements ParameterResolver {
     @FormatMethod
     @Override
     public TableResult exec(TableEnvironment env, String query, Object... args) {
-      return env.executeSql(String.format(query, args));
+      String fullQuery = String.format(query, args);
+      try {
+        return env.executeSql(fullQuery);
+      } catch (Exception e) {
+        throw new RuntimeException("Flink failed to run SQL: " + fullQuery, e);
+      }
     }
 
     @FormatMethod

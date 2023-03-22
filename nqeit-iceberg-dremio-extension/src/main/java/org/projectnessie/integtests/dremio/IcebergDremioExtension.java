@@ -63,7 +63,7 @@ public class IcebergDremioExtension implements ParameterResolver, ExecutionCondi
   public Object resolveParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
       throws ParameterResolutionException {
     if (paramCtx.getParameter().getType().equals(DremioHelper.class)) {
-      return new DremioHelper(dremioProjectId(), dremioToken(), dremioUrl(), dremioCatalogName());
+      return new DremioHelper(dremioToken(), dremioUrl(), dremioProjectId(), dremioCatalogName());
     }
     throw new ParameterResolutionException(
         "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());
