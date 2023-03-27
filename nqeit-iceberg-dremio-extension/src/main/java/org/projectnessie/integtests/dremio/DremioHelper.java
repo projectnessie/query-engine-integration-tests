@@ -57,12 +57,9 @@ public class DremioHelper {
     }
   }
 
-  DremioHelper(String token, String baseUrl, String projectId, String catalogName) {
+  DremioHelper(String token, String apiBaseUrl, String projectId, String catalogName) {
     this.token = token;
-    if (baseUrl.contains("://app.")) {
-      baseUrl = baseUrl.replaceFirst("://app.", "://api.");
-    }
-    this.projectUrl = baseUrl + "/v0/projects/" + projectId;
+    this.projectUrl = apiBaseUrl + "/v0/projects/" + projectId;
     this.catalogName = catalogName;
   }
 
@@ -70,11 +67,16 @@ public class DremioHelper {
     return catalogName;
   }
 
+  public String getJobUrl(String jobId) {
+    return projectUrl + "/job/" + jobId;
+  }
+
   private String createPayload(String query) throws JsonProcessingException {
     Map<String, Object> payload = new HashMap<>();
     payload.put("sql", query);
-    // TODO: for some reason this no longer works and we have to use fully qualified table names
-    payload.put("context", asList(catalogName, "db"));
+    // TODO: check on Dremio side why this API param no longer seems to work
+    //  and we have to use fully qualified table names instead
+    // payload.put("context", asList(catalogName, NAMESPACE));
     return OBJECT_MAPPER.writeValueAsString(payload);
   }
 
@@ -115,7 +117,7 @@ public class DremioHelper {
   private void waitForJobCompletion(String jobId, String query) throws IOException {
     // The doc for getting the job status for cloud is not there, but it is similar to software
     // See docs: https://docs.dremio.com/software/rest-api/jobs/get-job/
-    String url = projectUrl + "/job/" + jobId;
+    String url = getJobUrl(jobId);
     Set<String> finalJobStates = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
     // Default Timeout for engine-startup is 5min
     Duration timeout = Duration.ofMinutes(5);
@@ -146,7 +148,7 @@ public class DremioHelper {
 
   private List<List<Object>> fetchQueryResult(String jobId) throws IOException {
     // See docs: https://docs.dremio.com/cloud/api/job/
-    String url = projectUrl + "/job/" + jobId + "/results";
+    String url = getJobUrl(jobId) + "/results";
     String result = performHttpRequest(url, null);
 
     JsonNode node = parseJson(result, url);

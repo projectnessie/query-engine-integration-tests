@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.errorprone.annotations.FormatMethod;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -99,9 +98,7 @@ public class ITCrossEngineDremio {
   }
 
   private static String dremioTable(String tableName) {
-    return Stream.of(dremioHelper.getCatalogName(), NAMESPACE, tableName)
-        .map(x -> '"' + x + '"')
-        .collect(Collectors.joining("."));
+    return format("\"%s\".\"%s\".\"%s\"", dremioHelper.getCatalogName(), NAMESPACE, tableName);
   }
 
   private static String flinkTable(String tableName) {
