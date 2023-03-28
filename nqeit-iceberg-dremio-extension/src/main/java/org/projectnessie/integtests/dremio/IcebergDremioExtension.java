@@ -38,7 +38,17 @@ public class IcebergDremioExtension implements ParameterResolver, ExecutionCondi
   }
 
   private static String dremioUrl() {
-    return readRequiredSystemProperty("dremio.url");
+    String url = readRequiredSystemProperty("dremio.url");
+    if (url.contains("://app.")) {
+      // for user convenience we adjust the url for the rest API if necessary:
+      // app.dremio.cloud -> api.dremio.cloud
+      // see https://docs.dremio.com/cloud/appendix/supported-regions/
+      url = url.replaceFirst("://app.", "://api.");
+    }
+    if (url.endsWith("/")) {
+      url = url.substring(0, url.length() - 1);
+    }
+    return url;
   }
 
   private static String dremioToken() {
@@ -63,7 +73,7 @@ public class IcebergDremioExtension implements ParameterResolver, ExecutionCondi
   public Object resolveParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
       throws ParameterResolutionException {
     if (paramCtx.getParameter().getType().equals(DremioHelper.class)) {
-      return new DremioHelper(dremioProjectId(), dremioToken(), dremioUrl(), dremioCatalogName());
+      return new DremioHelper(dremioToken(), dremioUrl(), dremioProjectId(), dremioCatalogName());
     }
     throw new ParameterResolutionException(
         "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());

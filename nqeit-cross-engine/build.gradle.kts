@@ -27,6 +27,8 @@ dependencies {
   forScala(crossEngine.sparkScala.scalaVersion)
 
   testCompileOnly(platform(rootProject))
+  testCompileOnly(libs.jetbrains.annotations)
+  testCompileOnly(libs.errorprone.annotations)
 
   implementation("org.projectnessie:nessie-client")
   implementation(project(":nqeit-nessie-common"))
