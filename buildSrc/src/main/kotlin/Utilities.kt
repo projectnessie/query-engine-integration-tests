@@ -258,9 +258,11 @@ fun DependencyHandlerScope.icebergSparkDependencies(
       "3.2" -> add(configuration, "org.projectnessie:nessie-spark-3.2-extensions")
     }
   } else {
+    val newGroupIds = nessieMajor > 0.50
+    val groupId = if (newGroupIds) "org.projectnessie.nessie-integrations" else "org.projectnessie"
     add(
       configuration,
-      "org.projectnessie:nessie-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
+      "${groupId}:nessie-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
     ) {
       attributes {
         attribute(
