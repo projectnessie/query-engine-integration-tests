@@ -36,6 +36,7 @@ import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withType
+import org.gradle.util.VersionNumber
 
 /**
  * Apply the given `sparkVersion` as a `strictly` version constraint and [withSparkExcludes] on the
@@ -234,6 +235,23 @@ fun majorVersion(version: String): String {
   return "${elems[0]}.${elems[1]}"
 }
 
+@Suppress("DEPRECATION")
+fun String.parseVersion(): VersionNumber {
+  val version = VersionNumber.parse(this)
+  if (version.major + version.minor + version.patch + version.micro == 0) {
+    throw IllegalArgumentException("Not a valid version: $this")
+  }
+  return version
+}
+
+fun String.isHigherVersionThan(other: String): Boolean {
+  return this.parseVersion() > other.parseVersion()
+}
+
+fun String.isLowerVersionThan(other: String): Boolean {
+  return this.parseVersion() < other.parseVersion()
+}
+
 fun DependencyHandlerScope.icebergSparkDependencies(
   configuration: String,
   sparkScala: SparkScalaVersions,
@@ -251,14 +269,14 @@ fun DependencyHandlerScope.icebergSparkDependencies(
     "org.apache.iceberg:iceberg-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
   )
 
-  val nessieMajor = majorVersion(System.getProperty("nessie.versionNessie", "99.99")).toDouble()
-  if (nessieMajor < 0.40) {
+  val nessieVersion = System.getProperty("nessie.versionNessie", "99.99")
+  if (nessieVersion.isLowerVersionThan("0.40")) {
     when (sparkScala.sparkMajorVersion) {
       "3.1" -> add(configuration, "org.projectnessie:nessie-spark-extensions")
       "3.2" -> add(configuration, "org.projectnessie:nessie-spark-3.2-extensions")
     }
   } else {
-    val newGroupIds = nessieMajor > 0.50
+    val newGroupIds = nessieVersion.isHigherVersionThan("0.50")
     val groupId = if (newGroupIds) "org.projectnessie.nessie-integrations" else "org.projectnessie"
     add(
       configuration,

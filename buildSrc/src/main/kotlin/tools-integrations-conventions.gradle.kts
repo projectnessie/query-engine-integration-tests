@@ -71,7 +71,7 @@ configurations.all {
           }
 
           if (nessieVersionToUse != null) {
-            val newGroupIds = nessieVersionToUse.compareTo("0.50.0") > 0
+            val newGroupIds = nessieVersionToUse.isHigherVersionThan("0.50")
             var useGroupId =
               if (!newGroupIds) "org.projectnessie"
               else if (req.group != "org.projectnessie") req.group else "org.projectnessie.nessie"

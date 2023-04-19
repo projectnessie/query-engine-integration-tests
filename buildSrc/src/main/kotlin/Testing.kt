@@ -66,7 +66,7 @@ fun Project.nessieConfigureTestTasks() {
         group = "verification"
         description = "Runs the integration tests."
 
-        setForkEvery(1)
+        forkEvery = 1
       }
     tasks.named("check") { dependsOn(intTest) }
   }
@@ -103,7 +103,7 @@ fun Project.nessieConfigureTestTasks() {
           )
         } else {
           // Manage to specific Nessie version
-          val newGroupIds = nessieServerVersionToUse.compareTo("0.50.0") > 0
+          val newGroupIds = nessieServerVersionToUse.isHigherVersionThan("0.50")
           add(
             "nessieQuarkusServer",
             mapOf(
@@ -129,13 +129,13 @@ fun Project.nessieConfigureTestTasks() {
           it.startsWith("flink.") ||
           it.startsWith("nessie.")
       }
-      .forEach { k, v -> systemProperty(k, v) }
+      .forEach { (k, v) -> systemProperty(k, v) }
 
     if (externalNessieUrl != null) {
       systemProperty("quarkus.http.url", externalNessieUrl)
     }
     System.getProperties()
       .filterKeys { (it as String).startsWith("nessie.") }
-      .forEach { k, v -> systemProperty(k as String, v) }
+      .forEach { (k, v) -> systemProperty(k as String, v) }
   }
 }
