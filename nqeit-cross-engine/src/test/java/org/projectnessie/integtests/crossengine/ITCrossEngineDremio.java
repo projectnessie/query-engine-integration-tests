@@ -21,7 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.errorprone.annotations.FormatMethod;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -60,6 +64,111 @@ public class ITCrossEngineDremio {
   private static FlinkHelper flink;
   private static DremioHelper dremioHelper;
 
+  private static List<TestEngine> insertEngines;
+  private static List<TestEngine> deleteEngines;
+  private static List<TestEngine> selectEngines;
+
+  private interface TestEngine {
+
+    String getName();
+
+    void insertRow(String tableName, List<Object> row);
+
+    void deleteRow(String tableName, List<Object> row);
+
+    List<List<Object>> selectRowsOrderedById(String tableName);
+  }
+
+  private static final TestEngine DREMIO_ENGINE =
+      new TestEngine() {
+
+        @Override
+        public String getName() {
+          return "DREMIO";
+        }
+
+        @Override
+        public void insertRow(String tableName, List<Object> row) {
+          dremioHelper.runQuery(
+              "INSERT INTO %s VALUES %s", dremioTable(tableName), rowToSqlInsertValue(row));
+        }
+
+        @Override
+        public void deleteRow(String tableName, List<Object> row) {
+          dremioHelper.runQuery(
+              "DELETE FROM %s WHERE %s", dremioTable(tableName), rowToSqlDeletePredicate(row));
+        }
+
+        @Override
+        public List<List<Object>> selectRowsOrderedById(String tableName) {
+          return dremioHelper.runSelectQuery(
+              "SELECT * FROM %s ORDER BY id", dremioTable(tableName));
+        }
+      };
+
+  private static final TestEngine SPARK_ENGINE =
+      new TestEngine() {
+        @Override
+        public String getName() {
+          return "SPARK";
+        }
+
+        @Override
+        public void insertRow(String tableName, List<Object> row) {
+          sparkSql("INSERT INTO %s VALUES %s", sparkTable(tableName), rowToSqlInsertValue(row));
+        }
+
+        @Override
+        public void deleteRow(String tableName, List<Object> row) {
+          sparkSql("DELETE FROM %s WHERE %s", sparkTable(tableName), rowToSqlDeletePredicate(row));
+        }
+
+        @Override
+        public List<List<Object>> selectRowsOrderedById(String tableName) {
+          return sparkSql("SELECT id, val FROM %s ORDER BY id", sparkTable(tableName))
+              .collectAsList()
+              .stream()
+              .map(r -> asList(r.get(0), r.get(1)))
+              .collect(Collectors.toList());
+        }
+      };
+
+  private static final TestEngine FLINK_ENGINE =
+      new TestEngine() {
+
+        @Override
+        public String getName() {
+          return "FLINK";
+        }
+
+        @Override
+        public void insertRow(String tableName, List<Object> row) {
+          flink.sql(
+              "INSERT INTO %s (id, val) VALUES %s",
+              flinkTable(tableName), rowToSqlInsertValue(row));
+        }
+
+        @Override
+        public void deleteRow(String tableName, List<Object> row) {
+          throw new UnsupportedOperationException("Flink does not support delete statements");
+        }
+
+        @Override
+        public List<List<Object>> selectRowsOrderedById(String tableName) {
+          return flink.sql("SELECT id, val FROM %s ORDER BY id", flinkTable(tableName)).stream()
+              .map(r -> asList(r.getField(0), r.getField(1)))
+              .collect(Collectors.toList());
+        }
+      };
+
+  private static String rowToSqlInsertValue(List<Object> row) {
+    return String.format("(%s, '%s')", row.get(0), row.get(1));
+  }
+
+  private static String rowToSqlDeletePredicate(List<Object> row) {
+    return String.format("id=%s AND val='%s'", row.get(0), row.get(1));
+  }
+
   @FormatMethod
   private static Dataset<Row> sparkSql(@Language("SQL") String query, Object... args) {
     String fullQuery = format(query, args);
@@ -90,6 +199,28 @@ public class ITCrossEngineDremio {
 
     Stream.of(SPARK_TABLE, DREMIO_TABLE, FLINK_TABLE)
         .forEach(x -> sparkSql("DROP TABLE IF EXISTS %s", sparkTable(x)));
+
+    selectEngines = asList(DREMIO_ENGINE, SPARK_ENGINE, FLINK_ENGINE);
+    insertEngines = asList(DREMIO_ENGINE, SPARK_ENGINE, FLINK_ENGINE);
+    deleteEngines = asList(DREMIO_ENGINE, SPARK_ENGINE); // flink does not support deletes
+
+    long seed = System.currentTimeMillis();
+    System.out.println("testRandom seed: " + seed);
+    Random testRandom = new Random(seed);
+
+    Collections.shuffle(selectEngines, testRandom);
+    Collections.shuffle(insertEngines, testRandom);
+    Collections.shuffle(deleteEngines, testRandom);
+
+    System.out.println(
+        "selectEngines order: "
+            + selectEngines.stream().map(TestEngine::getName).collect(Collectors.joining(", ")));
+    System.out.println(
+        "insertEngines order: "
+            + insertEngines.stream().map(TestEngine::getName).collect(Collectors.joining(", ")));
+    System.out.println(
+        "deleteEngines order: "
+            + deleteEngines.stream().map(TestEngine::getName).collect(Collectors.joining(", ")));
   }
 
   private static String sparkTable(String tableName) {
@@ -106,86 +237,72 @@ public class ITCrossEngineDremio {
     return flink.qualifiedTableName(tableName);
   }
 
-  private void runInsertTests(String testTable) {
+  private static List<Object> toRow(int x) {
+    return asList(x, "row" + x);
+  }
+
+  private void assertSelectFromEngines(String tableName, List<List<Object>> tableRows) {
+    for (TestEngine engine : selectEngines) {
+      List<List<Object>> rows = engine.selectRowsOrderedById(tableName);
+      assertThat(rows).containsExactlyElementsOf(tableRows);
+    }
+  }
+
+  private List<List<Object>> runInsertTests(String tableName) {
+    List<List<Object>> rowsToInsert =
+        IntStream.rangeClosed(1, insertEngines.size())
+            .mapToObj(ITCrossEngineDremio::toRow)
+            .collect(Collectors.toList());
+
     List<List<Object>> tableRows = new ArrayList<>();
+    for (int i = 0; i < rowsToInsert.size(); i++) {
+      List<Object> row = rowsToInsert.get(i);
+      TestEngine engine = insertEngines.get(i);
+      engine.insertRow(tableName, row);
 
-    sparkSql("INSERT INTO %s VALUES (123, 'foo')", sparkTable(testTable));
-    tableRows.add(asList(123, "foo"));
-    assertSelectFromEngines(tableRows, testTable);
-
-    dremioHelper.runQuery("INSERT INTO %s VALUES (456,'bar')", dremioTable(testTable));
-    tableRows.add(asList(456, "bar"));
-    assertSelectFromEngines(tableRows, testTable);
-
-    flink.sql("INSERT INTO %s (id, val) VALUES (789, 'cool')", flinkTable(testTable));
-    tableRows.add(asList(789, "cool"));
-    assertSelectFromEngines(tableRows, testTable);
+      tableRows.add(row);
+      assertSelectFromEngines(tableName, tableRows);
+    }
+    return tableRows;
   }
 
-  private void runDeleteTests(String testTable) {
-    List<List<Object>> tableRows = new ArrayList<>();
-    tableRows.add(asList(123, "foo"));
-    tableRows.add(asList(456, "bar"));
-    tableRows.add(asList(789, "cool"));
+  private void runDeleteTests(String tableName, List<List<Object>> insertedRows) {
+    int rowCount = insertedRows.size();
+    assertThat(rowCount).isGreaterThan(deleteEngines.size());
 
-    sparkSql("DELETE FROM %s WHERE id=123 AND val='foo'", sparkTable(testTable));
-    tableRows.remove(asList(123, "foo"));
-    assertSelectFromEngines(tableRows, testTable);
+    List<List<Object>> tableRows = new ArrayList<>(insertedRows);
+    for (int i = 0; i < rowCount; i++) {
+      List<Object> row = tableRows.remove(0);
+      TestEngine engine = deleteEngines.get(i % deleteEngines.size());
+      engine.deleteRow(tableName, row);
 
-    dremioHelper.runQuery("DELETE FROM %s WHERE id=456 and val='bar'", dremioTable(testTable));
-    tableRows.remove(asList(456, "bar"));
-    assertSelectFromEngines(tableRows, testTable);
-
-    // Flink does not support delete statement, so the test for flink is skipped
+      assertSelectFromEngines(tableName, tableRows);
+    }
   }
 
-  private static void selectFromSpark(List<List<Object>> tableRows, String testTable) {
-    assertThat(
-            sparkSql("SELECT id, val FROM %s", sparkTable(testTable)).collectAsList().stream()
-                .map(r -> asList(r.get(0), r.get(1))))
-        .containsExactlyInAnyOrderElementsOf(tableRows);
-  }
-
-  private static void selectFromFlink(List<List<Object>> tableRows, String testTable) {
-    assertThat(flink.sql("SELECT * FROM %s", flinkTable(testTable)))
-        .hasSize(tableRows.size())
-        .map(r -> asList(r.getField(0), r.getField(1)))
-        .containsExactlyInAnyOrderElementsOf(tableRows);
-  }
-
-  private static void selectFromDremio(List<List<Object>> tableRows, String testTable) {
-    List<List<Object>> rows =
-        dremioHelper.runSelectQuery("SELECT * FROM %s", dremioTable(testTable));
-    assertThat(rows).containsExactlyInAnyOrderElementsOf(tableRows);
-  }
-
-  private void assertSelectFromEngines(List<List<Object>> tableRows, String testTable) {
-    selectFromSpark(tableRows, testTable);
-    selectFromDremio(tableRows, testTable);
-    selectFromFlink(tableRows, testTable);
+  private void runTests(String tableName) {
+    List<List<Object>> insertedRows = runInsertTests(tableName);
+    runDeleteTests(tableName, insertedRows);
   }
 
   @Test
   public void testDremioTable() {
     String testTable = DREMIO_TABLE;
     dremioHelper.runQuery("CREATE TABLE %s (id INT, val VARCHAR)", dremioTable(testTable));
-    runInsertTests(testTable);
-    runDeleteTests(testTable);
+    runTests(testTable);
   }
 
   @Test
   public void testSparkTable() {
     String testTable = SPARK_TABLE;
     sparkSql("CREATE TABLE %s (id int, val string)", sparkTable(testTable));
-    runInsertTests(testTable);
-    runDeleteTests(testTable);
+    runTests(testTable);
   }
 
   @Test
   public void testFlinkTable() {
     String testTable = FLINK_TABLE;
     flink.sql("CREATE TABLE %s (id INT, val STRING)", flinkTable(testTable));
-    runInsertTests(testTable);
-    runDeleteTests(testTable);
+    runTests(testTable);
   }
 }
