@@ -23,8 +23,8 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
-import org.projectnessie.quarkus.gradle.QuarkusAppExtension
-import org.projectnessie.quarkus.gradle.QuarkusAppPlugin
+import org.projectnessie.nessierunner.gradle.NessieRunnerExtension
+import org.projectnessie.nessierunner.gradle.NessieRunnerPlugin
 
 fun Project.nessieConfigureTestTasks() {
   if (projectDir.resolve("src/test").exists()) {
@@ -74,8 +74,8 @@ fun Project.nessieConfigureTestTasks() {
   val externalNessieUrl = System.getProperty("nessie.externalNessieUrl")
 
   if (externalNessieUrl == null) {
-    plugins.withType(QuarkusAppPlugin::class.java).configureEach {
-      configure<QuarkusAppExtension> {
+    plugins.withType(NessieRunnerPlugin::class.java).configureEach {
+      configure<NessieRunnerExtension> {
         try {
           includeTask(tasks.named<Test>("intTest"))
         } catch (x: UnknownTaskException) {
