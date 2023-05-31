@@ -192,7 +192,7 @@ fun versionRestrictions(
   if (addedRestrictions.isEmpty()) {
     return currentRestrictions
   }
-  return currentRestrictions.union(addedRestrictions)
+  return currentRestrictions.intersect(addedRestrictions)
 }
 
 fun restrictedVersion(restrictions: Set<String>, majorVersion: String): Boolean =
