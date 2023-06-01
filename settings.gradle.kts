@@ -182,17 +182,21 @@ fun updateDefaultVersion(restrictions: Set<String>, project: String) {
   }
 }
 
+/**
+ * Combines two sets of version restrictions. An empty set means "do not care", so the "other" one
+ * will be returned. If both sets are not empty, the common set will be returned.
+ */
 fun versionRestrictions(
   currentRestrictions: Set<String>,
-  addedRestrictions: Set<String>
+  intersectRestrictions: Set<String>
 ): Set<String> {
   if (currentRestrictions.isEmpty()) {
-    return addedRestrictions
+    return intersectRestrictions
   }
-  if (addedRestrictions.isEmpty()) {
+  if (intersectRestrictions.isEmpty()) {
     return currentRestrictions
   }
-  return currentRestrictions.intersect(addedRestrictions)
+  return currentRestrictions.intersect(intersectRestrictions)
 }
 
 fun restrictedVersion(restrictions: Set<String>, majorVersion: String): Boolean =
