@@ -15,7 +15,6 @@
  */
 
 import java.util.Properties
-import java.util.regex.Pattern
 import org.gradle.internal.component.local.model.DefaultProjectComponentSelector
 
 if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11)) {
@@ -325,17 +324,7 @@ if (includeIcebergBuild) {
   includeBuild(icebergSourceDir) {
     name = "iceberg"
 
-    val propertyPattern = Pattern.compile("\\s*(\\S+)\\s*=\\s*(\\S+)\\s*")!!
-
-    // Iceberg's "dependency recommendation" stuff doesn't work when the Iceberg build is included
-    // here. So parse Iceberg's versions.props file here and substitute the affected dependencies.
-    val icebergVersions = mutableMapOf<String, String>()
-    file(projectDir.resolve("versions.props")).forEachLine { line ->
-      val m = propertyPattern.matcher(line.trim())
-      if (m.matches()) {
-        icebergVersions[m.group(1)] = m.group(2)
-      }
-    }
+    var icebergVersions = mutableMapOf<String, String>()
     // TODO These dependencies are pulled from
     //   'com.google.cloud:google-cloud-bom:0.164.0'
     // via
