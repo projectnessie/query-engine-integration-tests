@@ -50,6 +50,9 @@ jobs:
       - name: Checkout Integrations Testing repo
         uses: actions/checkout@v3
 
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+
       - name: Setup runner
         uses: ./.github/actions/setup-runner
         with:
@@ -209,6 +212,9 @@ jobs:
       - name: Checkout Integrations Testing repo
         uses: actions/checkout@v3
 
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+
       - name: Setup gradle.properties
         run: |
           mkdir -p ~/.gradle
@@ -241,6 +247,9 @@ jobs:
     steps:
       - name: Checkout Integrations Testing repo
         uses: actions/checkout@v3
+
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
 
       - name: Setup gradle.properties
         run: |
