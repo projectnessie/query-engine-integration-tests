@@ -71,6 +71,8 @@ gradleEnterprise {
   }
 }
 
+rootProject.name = "NesQuEIT"
+
 gradle.beforeProject {
   version = baseVersion
   group = "org.projectnessie.integrations-tools-tests"
