@@ -48,7 +48,7 @@ jobs:
           git config --global user.name "Integrations Testing [Bot]"
 
       - name: Checkout Integrations Testing repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Free disk space
         uses: ./.github/actions/free-disk-space
@@ -210,7 +210,7 @@ jobs:
 
     steps:
       - name: Checkout Integrations Testing repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Free disk space
         uses: ./.github/actions/free-disk-space
@@ -246,7 +246,7 @@ jobs:
 
     steps:
       - name: Checkout Integrations Testing repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Free disk space
         uses: ./.github/actions/free-disk-space
