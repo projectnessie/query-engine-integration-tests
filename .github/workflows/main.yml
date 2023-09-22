@@ -123,6 +123,11 @@ jobs:
         with:
           arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.12:intTest --scan
 
+      - name: Nessie Spark 3.5 / 2.13 Extensions test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:test :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:intTest --scan
+
       - name: Build before publish
         uses: gradle/gradle-build-action@v2
         with:
@@ -201,6 +206,42 @@ jobs:
       #      install -DskipTests \
       #      -Ddep.iceberg.version=${ICEBERG_VERSION} \
       #      -Ddep.nessie.version=${NESSIE_VERSION}
+
+  iceberg140_nessie0710:
+    name: Nessie 0.71.0 / Iceberg 1.4.0
+    runs-on: ubuntu-latest
+    env:
+      SPARK_LOCAL_IP: localhost
+
+    steps:
+      - name: Checkout Integrations Testing repo
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+
+      - name: Setup gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 11
+
+      - name: Show Gradle projects
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: true
+          arguments: projects -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.0
+
+      - name: Tools & Integrations tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: intTest -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.0 --scan
 
   iceberg131_nessie0651:
     name: Nessie 0.65.1 / Iceberg 1.3.1
