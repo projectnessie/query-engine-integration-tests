@@ -9,7 +9,7 @@ This project is meant to test various query engines (Spark, Flink, Presto, etc) 
 
 Test runs are driven by either configuring the released versions of Nessie and Iceberg, or by using
 Git clones of the respective heads of [Nessie's main branch](https://github.com/projectnessie/nessie)
-and/or [Iceberg's master branch](https://github.com/apache/iceberg).
+and/or [Iceberg's main branch](https://github.com/apache/iceberg).
 
 Goals:
 * Be and stay open source!
@@ -308,7 +308,7 @@ The easiest way to implement this locally is to use [Git worktree](https://git-s
    directory.
    ```shell
    cd PATH_TO_YOUR_LOCAL_ICEBERG_CLONE
-   git worktree add --track -b integ-tests-master ${NESSIE_INTEGRATION_TESTS}/included-builds/iceberg origin/master
+   git worktree add --track -b integ-tests-main ${NESSIE_INTEGRATION_TESTS}/included-builds/iceberg origin/main
    ```
 
 #### Symbolic links
