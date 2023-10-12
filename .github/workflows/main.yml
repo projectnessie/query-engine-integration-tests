@@ -24,7 +24,7 @@ on:
 
 jobs:
   latest:
-    name: Nessie main/Iceberg master
+    name: Nessie main/Iceberg main
     runs-on: ubuntu-latest
     env:
       GIT_FETCH_DEPTH: 0
@@ -36,7 +36,7 @@ jobs:
       NESSIE_PATCH_BRANCH: ''
       ICEBERG_DIR: included-builds/iceberg
       ICEBERG_MAIN_REPOSITORY: apache/iceberg
-      ICEBERG_MAIN_BRANCH: master
+      ICEBERG_MAIN_BRANCH: main
       ICEBERG_PATCH_REPOSITORY: snazy/iceberg
       ICEBERG_PATCH_BRANCH: iceberg-nesqueit
       SPARK_LOCAL_IP: localhost
@@ -133,7 +133,7 @@ jobs:
         with:
           arguments: jar testClasses javadoc --scan
 
-      # TODO re-enable once Iceberg/master references a Nessie release w/ Nessie PR #6197,
+      # TODO re-enable once Iceberg/main references a Nessie release w/ Nessie PR #6197,
       #   Gradle's Maven publishing fails with the group-ID relocation.
       #
       #- name: Publish Nessie + Iceberg to local Maven repo
