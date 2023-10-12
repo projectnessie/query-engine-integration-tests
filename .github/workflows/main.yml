@@ -36,7 +36,7 @@ jobs:
       NESSIE_PATCH_BRANCH: ''
       ICEBERG_DIR: included-builds/iceberg
       ICEBERG_MAIN_REPOSITORY: apache/iceberg
-      ICEBERG_MAIN_BRANCH: master
+      ICEBERG_MAIN_BRANCH: main
       ICEBERG_PATCH_REPOSITORY: snazy/iceberg
       ICEBERG_PATCH_BRANCH: iceberg-nesqueit
       SPARK_LOCAL_IP: localhost
