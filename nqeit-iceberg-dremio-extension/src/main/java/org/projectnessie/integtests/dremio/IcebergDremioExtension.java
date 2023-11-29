@@ -15,7 +15,10 @@
  */
 package org.projectnessie.integtests.dremio;
 
+import static org.projectnessie.integtests.nessie.internal.Util.checkSupportedParameterType;
+
 import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -51,31 +54,36 @@ public class IcebergDremioExtension implements ParameterResolver, ExecutionCondi
     return url;
   }
 
-  private static String dremioToken() {
-    return readRequiredSystemProperty("dremio.token");
-  }
-
-  private static String dremioProjectId() {
-    return readRequiredSystemProperty("dremio.project-id");
-  }
-
-  private static String dremioCatalogName() {
-    return readRequiredSystemProperty("dremio.catalog-name");
-  }
-
   @Override
   public boolean supportsParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
       throws ParameterResolutionException {
-    return paramCtx.getParameter().getType().equals(DremioHelper.class);
+    if (paramCtx.isAnnotated(Dremio.class)) {
+      checkSupportedParameterType(Dremio.class, paramCtx, DremioHelper.class);
+      return true;
+    }
+    return false;
   }
 
   @Override
   public Object resolveParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
       throws ParameterResolutionException {
-    if (paramCtx.getParameter().getType().equals(DremioHelper.class)) {
-      return new DremioHelper(dremioToken(), dremioUrl(), dremioProjectId(), dremioCatalogName());
+    Optional<Dremio> dremioAnnotation = paramCtx.findAnnotation(Dremio.class);
+    if (dremioAnnotation.isPresent()) {
+      return buildDremioHelperFromSystemProperties(dremioAnnotation.get().systemPropertyPrefix());
     }
     throw new ParameterResolutionException(
         "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());
+  }
+
+  private DremioHelper buildDremioHelperFromSystemProperties(String systemPropertyPrefix) {
+    if (systemPropertyPrefix == null || !systemPropertyPrefix.endsWith(".")) {
+      throw new IllegalArgumentException("Invalid systemPropertyPrefix: " + systemPropertyPrefix);
+    }
+    String apiBaseUrl = dremioUrl(); // same for all DremioHelper test params
+    String token = readRequiredSystemProperty(systemPropertyPrefix + "token");
+    String projectId = readRequiredSystemProperty(systemPropertyPrefix + "project-id");
+    String catalogName = readRequiredSystemProperty(systemPropertyPrefix + "catalog-name");
+
+    return new DremioHelper(token, apiBaseUrl, projectId, catalogName);
   }
 }

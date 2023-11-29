@@ -64,19 +64,33 @@ public class Util {
                 .collect(Collectors.joining(", "))));
   }
 
-  public static Map<String, String> nessieClientParams(ExtensionContext extensionContext) {
+  public static Map<String, String> nessieClientParams(
+      ExtensionContext extensionContext, String overrideSystemPropertyPrefix) {
     Map<String, String> params = new HashMap<>();
 
     params.put("ref", DefaultBranchPerRun.get(extensionContext).getDefaultBranch().getName());
     params.put("uri", NessieEnv.get(extensionContext).getNessieUri());
+
+    applySystemPropertiesByPrefix(params, "nessie.client.");
+
+    if (overrideSystemPropertyPrefix != null && !overrideSystemPropertyPrefix.isEmpty()) {
+      if (!overrideSystemPropertyPrefix.endsWith(".")) {
+        throw new IllegalArgumentException(
+            "Invalid overrideSystemPropertyPrefix: " + overrideSystemPropertyPrefix);
+      }
+      applySystemPropertiesByPrefix(params, overrideSystemPropertyPrefix);
+    }
+
+    return params;
+  }
+
+  private static void applySystemPropertiesByPrefix(Map<String, String> params, String keyPrefix) {
     System.getProperties().entrySet().stream()
-        .filter(e -> e.getKey().toString().startsWith("nessie.client."))
+        .filter(e -> e.getKey().toString().startsWith(keyPrefix))
         .forEach(
             e ->
                 params.put(
-                    e.getKey().toString().substring("nessie.client.".length()),
-                    e.getValue().toString()));
-    return params;
+                    e.getKey().toString().substring(keyPrefix.length()), e.getValue().toString()));
   }
 
   public static String dateTimeString() {

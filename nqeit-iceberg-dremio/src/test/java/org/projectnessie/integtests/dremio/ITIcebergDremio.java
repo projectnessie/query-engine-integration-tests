@@ -32,53 +32,55 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class ITIcebergDremio {
 
   private static final List<List<Object>> tableRows = new ArrayList<>();
+  private static DremioHelper dremioHelper;
 
   @BeforeAll
-  public static void setUp(DremioHelper dremioHelper) {
-    dropTableIfExists(dremioHelper);
+  public static void setUp(@Dremio DremioHelper dremioHelper) {
+    ITIcebergDremio.dremioHelper = dremioHelper;
+    dropTableIfExists();
   }
 
-  private static void dropTableIfExists(DremioHelper dremioHelper) {
+  private static void dropTableIfExists() {
     dremioHelper.runQuery("DROP TABLE IF EXISTS foo_bar");
   }
 
   @Order(100)
   @Test
-  public void createTable(DremioHelper dremioHelper) {
+  public void createTable() {
     dremioHelper.runQuery("CREATE TABLE foo_bar (id INT, val VARCHAR)");
   }
 
   @Order(110)
   @Test
-  public void insertInto(DremioHelper dremioHelper) {
+  public void insertInto() {
     dremioHelper.runQuery("INSERT INTO foo_bar VALUES (456,'bar')");
     tableRows.add(asList(456, "bar"));
   }
 
   @Order(120)
   @Test
-  public void selectFrom(DremioHelper dremioHelper) {
+  public void selectFrom() {
     List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM foo_bar");
     assertThat(rows).containsExactlyInAnyOrderElementsOf(tableRows);
   }
 
   @Order(130)
   @Test
-  public void insertInto2(DremioHelper dremioHelper) {
+  public void insertInto2() {
     dremioHelper.runQuery("INSERT INTO foo_bar VALUES (123,'foo')");
     tableRows.add(asList(123, "foo"));
   }
 
   @Order(140)
   @Test
-  public void selectFrom2(DremioHelper dremioHelper) {
+  public void selectFrom2() {
     List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM foo_bar");
     assertThat(rows).containsExactlyInAnyOrderElementsOf(tableRows);
   }
 
   @Order(150)
   @Test
-  public void dropTable(DremioHelper dremioHelper) {
+  public void dropTable() {
     dremioHelper.runQuery("DROP TABLE foo_bar");
   }
 }

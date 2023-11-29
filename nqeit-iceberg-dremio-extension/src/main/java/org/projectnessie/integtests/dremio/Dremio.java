@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Dremio
+ * Copyright (C) 2023 Dremio
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.projectnessie.integtests.iceberg.spark;
+package org.projectnessie.integtests.dremio;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -24,14 +24,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface Spark {
+public @interface Dremio {
 
-  /**
-   * the nessie client configuration is derived from all system properties that start with
-   * "nessie.client."
-   *
-   * <p>config values can be overriden selectively by providing another prefix here (i.e.
-   * "nessie.readonly.client")
-   */
-  String nessieClientOverrideSystemPropertyPrefix() default "";
+  String systemPropertyPrefix() default "dremio.";
 }

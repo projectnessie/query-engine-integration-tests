@@ -91,7 +91,7 @@ public class NessieTestsExtension implements ParameterResolver, BeforeEachCallba
       }
     }
     if (parameterContext.isAnnotated(NessieClientParams.class)) {
-      return nessieClientParams(extensionContext);
+      return nessieClientParams(extensionContext, null);
     }
 
     return null;

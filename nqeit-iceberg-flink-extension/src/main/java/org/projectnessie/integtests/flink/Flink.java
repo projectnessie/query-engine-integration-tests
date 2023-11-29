@@ -29,4 +29,14 @@ import org.apache.flink.table.api.TableEnvironment;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface Flink {}
+public @interface Flink {
+
+  /**
+   * the nessie client configuration is derived from all system properties that start with
+   * "nessie.client."
+   *
+   * <p>config values can be overriden selectively by providing another prefix here (i.e.
+   * "nessie.readonly.client")
+   */
+  String nessieClientOverrideSystemPropertyPrefix() default "";
+}
