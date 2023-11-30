@@ -45,3 +45,5 @@ tasks.withType<Test>().configureEach {
   systemProperty("presto.prestoMajorVersion", presto.prestoMajorVersion)
   systemProperty("presto.prestoVersion", presto.prestoVersion)
 }
+
+forceJavaVersionForTests(11)
