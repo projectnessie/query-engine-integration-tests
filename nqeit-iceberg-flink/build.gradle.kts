@@ -47,5 +47,9 @@ tasks.withType<Test>().configureEach {
   systemProperty("flink.scalaMajorVersion", flink.scalaMajorVersion)
 }
 
+forceJavaVersionForTests(
+  11
+)
+
 // Note: Nessie-Quarkus server dependency and Projectnessie plugin are automatically configured,
 // when the Projectnessie plugin's included in the `plugins` section.
