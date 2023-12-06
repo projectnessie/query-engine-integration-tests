@@ -18,7 +18,14 @@
       matchManagers: ["maven", "gradle", "gradle-wrapper"],
       matchUpdateTypes: ["major"],
       automerge: false
-    }
+    },
+
+    // Reduce awssdk update frequency (which has daily releases)
+    {
+      matchManagers: ["maven", "gradle"],
+      matchPackageNames: ["software.amazon.awssdk:*"],
+      extends: ["schedule:weekly"],
+    },
   ],
 
   // Max 50 PRs in total, 10 per hour
