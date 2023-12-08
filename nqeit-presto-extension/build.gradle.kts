@@ -29,6 +29,8 @@ dependencies {
   compileOnly(libs.microprofile.openapi)
   compileOnly(libs.jetbrains.annotations)
 
+  compileOnly(libs.guava)
+
   compileOnly(platform(libs.junit.bom))
   compileOnly(libs.junit.jupiter.engine)
 
