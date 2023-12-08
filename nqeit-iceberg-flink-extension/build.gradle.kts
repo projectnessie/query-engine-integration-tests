@@ -31,6 +31,8 @@ dependencies {
   compileOnly(libs.jetbrains.annotations)
   compileOnly(libs.errorprone.annotations)
 
+  compileOnly(libs.guava)
+
   compileOnly(platform(libs.junit.bom))
   compileOnly(libs.junit.jupiter.engine)
 

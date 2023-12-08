@@ -370,7 +370,7 @@ if (includeIcebergBuild) {
           }
         }
       }
-      System.getProperty("flinkVersions", "1.15").split(",").forEach { flinkVersion ->
+      System.getProperty("flinkVersions", "1.16").split(",").forEach { flinkVersion ->
         substitute(module("org.apache.iceberg:iceberg-flink-$flinkVersion"))
           .using(project(":iceberg-flink:iceberg-flink-$flinkVersion"))
         substitute(module("org.apache.iceberg:iceberg-flink-runtime-$flinkVersion"))
