@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -45,6 +46,7 @@ import org.apache.flink.table.api.TableResult;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
 import org.apache.iceberg.CatalogProperties;
+import org.apache.iceberg.flink.FlinkCatalogFactory;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -84,8 +86,9 @@ public class IcebergFlinkExtension implements ParameterResolver {
   public Object resolveParameter(
       ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
-    if (parameterContext.isAnnotated(Flink.class)) {
-      FlinkPerRun flink = FlinkPerRun.get(extensionContext);
+    Optional<Flink> flinkAnnotation = parameterContext.findAnnotation(Flink.class);
+    if (flinkAnnotation.isPresent()) {
+      FlinkPerRun flink = FlinkPerRun.get(extensionContext, flinkAnnotation.get());
       if (FlinkHelper.class.isAssignableFrom(parameterContext.getParameter().getType())) {
         return flink;
       }
@@ -101,15 +104,19 @@ public class IcebergFlinkExtension implements ParameterResolver {
     private final String catalogName;
     private final String databaseName = "db";
 
-    static FlinkPerRun get(ExtensionContext extensionContext) {
+    static FlinkPerRun get(ExtensionContext extensionContext, Flink flinkConfig) {
       return extensionContext
           .getRoot()
           .getStore(NAMESPACE)
           .getOrComputeIfAbsent(
-              FlinkPerRun.class, c -> new FlinkPerRun(extensionContext), FlinkPerRun.class);
+              FlinkPerRun.class.getSimpleName()
+                  + "@"
+                  + flinkConfig.nessieClientOverrideSystemPropertyPrefix(),
+              c -> new FlinkPerRun(extensionContext, flinkConfig),
+              FlinkPerRun.class);
     }
 
-    private FlinkPerRun(ExtensionContext extensionContext) {
+    private FlinkPerRun(ExtensionContext extensionContext, Flink flinkConfig) {
       this.flinkHolder = FlinkHolder.get(extensionContext);
 
       NessieEnv env = NessieEnv.get(extensionContext);
@@ -120,10 +127,17 @@ public class IcebergFlinkExtension implements ParameterResolver {
       config.put("type", "iceberg");
       config.put(CatalogProperties.CATALOG_IMPL, "org.apache.iceberg.nessie.NessieCatalog");
       config.put(CatalogProperties.CACHE_ENABLED, "false");
-      config.putAll(nessieClientParams(extensionContext));
+      config.putAll(
+          nessieClientParams(
+              extensionContext, flinkConfig.nessieClientOverrideSystemPropertyPrefix()));
       config.put(
           CatalogProperties.WAREHOUSE_LOCATION,
           IcebergWarehouse.get(extensionContext).getUri().toString());
+
+      // without this setting iceberg-flink tries creating a default database:
+      // https://github.com/apache/iceberg/blob/apache-iceberg-1.2.1/flink/v1.16/flink/src/main/java/org/apache/iceberg/flink/FlinkCatalog.java#L127-L134
+      // this will fail when the nessie token is for a user with read-only  permissions
+      config.put(FlinkCatalogFactory.DEFAULT_DATABASE, databaseName());
 
       sql("CREATE CATALOG %s WITH %s", catalogName(), toWithClause(config));
       sql("CREATE DATABASE IF NOT EXISTS %s.%s", catalogName(), databaseName());

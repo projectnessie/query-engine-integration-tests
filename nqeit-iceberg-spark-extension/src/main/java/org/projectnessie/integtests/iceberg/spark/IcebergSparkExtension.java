@@ -18,6 +18,7 @@ package org.projectnessie.integtests.iceberg.spark;
 import static org.projectnessie.integtests.nessie.internal.Util.checkSupportedParameterType;
 import static org.projectnessie.integtests.nessie.internal.Util.nessieClientParams;
 
+import java.util.Optional;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.internal.SQLConf;
@@ -51,8 +52,10 @@ public class IcebergSparkExtension implements ParameterResolver {
   public Object resolveParameter(
       ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
-    if (parameterContext.isAnnotated(Spark.class)) {
-      return SparkSessionHolder.get(extensionContext).getConfiguredSparkSession(extensionContext);
+    Optional<Spark> sparkAnnotation = parameterContext.findAnnotation(Spark.class);
+    if (sparkAnnotation.isPresent()) {
+      return SparkSessionHolder.get(extensionContext, sparkAnnotation.get())
+          .getConfiguredSparkSession(extensionContext, sparkAnnotation.get());
     }
     return null;
   }
@@ -62,20 +65,23 @@ public class IcebergSparkExtension implements ParameterResolver {
     private final SparkConf conf;
     private SparkSession sparkSession;
 
-    static SparkSessionHolder get(ExtensionContext extensionContext) {
+    static SparkSessionHolder get(ExtensionContext extensionContext, Spark sparkConfig) {
       return extensionContext
           .getRoot()
           .getStore(NAMESPACE)
           .getOrComputeIfAbsent(
-              SparkSessionHolder.class,
-              c -> new SparkSessionHolder(extensionContext),
+              SparkSessionHolder.class.getSimpleName()
+                  + "@"
+                  + sparkConfig.nessieClientOverrideSystemPropertyPrefix(),
+              c -> new SparkSessionHolder(extensionContext, sparkConfig),
               SparkSessionHolder.class);
     }
 
-    private SparkSessionHolder(ExtensionContext extensionContext) {
+    private SparkSessionHolder(ExtensionContext extensionContext, Spark sparkConfig) {
       this.conf = new SparkConf();
 
-      nessieClientParams(extensionContext).forEach(this::applyConf);
+      nessieClientParams(extensionContext, sparkConfig.nessieClientOverrideSystemPropertyPrefix())
+          .forEach(this::applyConf);
       applyConf("warehouse", IcebergWarehouse.get(extensionContext).getUri().toString());
 
       conf.set(SQLConf.PARTITION_OVERWRITE_MODE().key(), "dynamic")
@@ -109,8 +115,10 @@ public class IcebergSparkExtension implements ParameterResolver {
       conf.set(String.format("spark.sql.catalog.spark_catalog.%s", k), v);
     }
 
-    public SparkSession getConfiguredSparkSession(ExtensionContext extensionContext) {
-      nessieClientParams(extensionContext).forEach(this::applyConf);
+    public SparkSession getConfiguredSparkSession(
+        ExtensionContext extensionContext, Spark sparkConfig) {
+      nessieClientParams(extensionContext, sparkConfig.nessieClientOverrideSystemPropertyPrefix())
+          .forEach(this::applyConf);
       SparkSession spark =
           SparkSession.builder().master(SPARK_MASTER_URL).config(conf).getOrCreate();
       spark.sparkContext().setLogLevel(System.getProperty("spark.log.level", "WARN"));
