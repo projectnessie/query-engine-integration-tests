@@ -23,7 +23,7 @@
     // Reduce awssdk update frequency (which has daily releases)
     {
       matchManagers: ["maven", "gradle"],
-      matchPackageNames: ["software.amazon.awssdk:*"],
+      matchPackagePrefixes: ["software.amazon.awssdk"],
       extends: ["schedule:weekly"],
     },
   ],
