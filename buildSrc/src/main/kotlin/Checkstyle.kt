@@ -46,4 +46,22 @@ fun Project.nessieConfigureCheckstyle() {
     }
     maxWarnings = 0 // treats warnings as errors
   }
+
+  configurations.configureEach {
+    // Avoids dependency resolution error:
+    // Could not resolve all task dependencies for configuration '...:checkstyle'.
+    //   > Module 'com.google.guava:guava' has been rejected:
+    //     Cannot select module with conflict on capability
+    //         'com.google.collections:google-collections:33.0.0-jre'
+    //         also provided by [com.google.collections:google-collections:1.0(runtime)]
+    //   > Module 'com.google.collections:google-collections' has been rejected:
+    //     Cannot select module with conflict on capability
+    //         'com.google.collections:google-collections:1.0'
+    //         also provided by [com.google.guava:guava:33.0.0-jre(jreRuntimeElements)]
+    resolutionStrategy.capabilitiesResolution.withCapability(
+      "com.google.collections:google-collections"
+    ) {
+      selectHighestVersion()
+    }
+  }
 }
