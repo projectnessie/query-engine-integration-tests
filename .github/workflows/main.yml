@@ -205,8 +205,8 @@ jobs:
       #      -Ddep.iceberg.version=${ICEBERG_VERSION} \
       #      -Ddep.nessie.version=${NESSIE_VERSION}
 
-  iceberg142_nessie0710:
-    name: Nessie 0.71.0 / Iceberg 1.4.2
+  iceberg143_nessie0710:
+    name: Nessie 0.71.0 / Iceberg 1.4.3
     runs-on: ubuntu-latest
     env:
       SPARK_LOCAL_IP: localhost
@@ -234,12 +234,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           cache-read-only: true
-          arguments: projects -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.2
+          arguments: projects -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.3
 
       - name: Tools & Integrations tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: intTest -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.2 --scan
+          arguments: intTest -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.3 --scan
 
   iceberg131_nessie0651:
     name: Nessie 0.65.1 / Iceberg 1.3.1
@@ -276,40 +276,3 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: intTest -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1 --scan
-
-  iceberg131_nessie0601:
-    name: Nessie 0.60.1 / Iceberg 1.3.1
-    runs-on: ubuntu-latest
-    env:
-      SPARK_LOCAL_IP: localhost
-
-    steps:
-      - name: Checkout Integrations Testing repo
-        uses: actions/checkout@v4
-
-      - name: Free disk space
-        uses: ./.github/actions/free-disk-space
-
-      - name: Setup gradle.properties
-        run: |
-          mkdir -p ~/.gradle
-          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
-          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 11
-
-      - name: Show Gradle projects
-        uses: gradle/gradle-build-action@v2
-        with:
-          cache-read-only: true
-          arguments: projects -Dnessie.versionNessie=0.60.1 -Dnessie.versionIceberg=1.3.1
-
-      - name: Tools & Integrations tests
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: intTest -Dnessie.versionNessie=0.60.1 -Dnessie.versionIceberg=1.3.1 --scan
-
