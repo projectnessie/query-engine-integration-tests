@@ -78,7 +78,7 @@ test-rerun-plugin = { module = "org.caffinitas.gradle.testrerun:gradle-test-reru
 
 [plugins]
 errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
-idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version = "1.1.7" }
+idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version = "1.1.8" }
 jandex = { id = "com.github.vlsi.jandex", version.ref = "jandexPlugin" }
 nessie-run = { id = "org.projectnessie", version.ref = "nessieRunPlugin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotlessPlugin" }
