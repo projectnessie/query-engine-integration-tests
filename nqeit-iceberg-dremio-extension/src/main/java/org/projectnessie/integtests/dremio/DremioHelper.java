@@ -114,17 +114,40 @@ public class DremioHelper {
     return readResponse(con, url);
   }
 
+  private static void sleep(Duration duration) {
+    try {
+      Thread.sleep(duration.toMillis());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
   private void waitForJobCompletion(String jobId, String query) throws IOException {
-    // The doc for getting the job status for cloud is not there, but it is similar to software
-    // See docs: https://docs.dremio.com/software/rest-api/jobs/get-job/
+    // See docs: https://docs.dremio.com/cloud/reference/api/job/
     String url = getJobUrl(jobId);
     Set<String> finalJobStates = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
     // Default Timeout for engine-startup is 5min
     Duration timeout = Duration.ofMinutes(5);
     Instant deadline = Instant.now().plus(timeout);
 
+    boolean first = true;
     while (true) {
-      String responseBody = performHttpRequest(url, null);
+      if (first) {
+        first = false;
+      } else {
+        sleep(Duration.ofSeconds(5));
+      }
+      String responseBody;
+      try {
+        responseBody = performHttpRequest(url, null);
+      } catch (IOException e) {
+        boolean rateLimited = e.getMessage() != null && e.getMessage().contains("http code: 429");
+        if (rateLimited) {
+          // retry
+          continue;
+        }
+        throw e;
+      }
       JsonNode node = parseJson(responseBody, url);
       String jobState = node.get("jobState").textValue();
       if (finalJobStates.contains(jobState)) {
@@ -138,16 +161,11 @@ public class DremioHelper {
               "Timeout after %s\njobId: %s\nQuery: %s\nresponse body: %s",
               timeout, jobId, query, responseBody)
           .isBefore(deadline);
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
     }
   }
 
   private List<List<Object>> fetchQueryResult(String jobId) throws IOException {
-    // See docs: https://docs.dremio.com/cloud/api/job/
+    // See docs: https://docs.dremio.com/cloud/reference/api/job/job-results
     String url = getJobUrl(jobId) + "/results";
     String result = performHttpRequest(url, null);
 
