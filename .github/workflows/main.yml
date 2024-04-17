@@ -205,6 +205,45 @@ jobs:
       #      -Ddep.iceberg.version=${ICEBERG_VERSION} \
       #      -Ddep.nessie.version=${NESSIE_VERSION}
 
+  iceberg150_nessie0790:
+    name: Nessie 0.79.0 / Iceberg 1.5.0
+    runs-on: ubuntu-latest
+    env:
+      SPARK_LOCAL_IP: localhost
+
+    steps:
+      - name: Checkout Integrations Testing repo
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+
+      - name: Setup gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          # Java 17 required for Nessie build, Java 11 required for Flink & Presto
+          java-version: |
+            11
+            17
+
+      - name: Show Gradle projects
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: true
+          arguments: projects -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0
+
+      - name: Tools & Integrations tests
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          arguments: intTest -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0 --scan
+
   iceberg143_nessie0780:
     name: Nessie 0.78.0 / Iceberg 1.4.3
     runs-on: ubuntu-latest
