@@ -96,48 +96,37 @@ jobs:
             11
             17
 
-      - name: Spotless
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          arguments: spotlessCheck --scan
+          cache-read-only: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+
+      - name: Spotless
+        run: ./gradlew spotlessCheck --scan
 
       - name: Checkstyle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: checkstyleMain checkstyleTest --scan
+        run: ./gradlew checkstyleMain checkstyleTest --scan
 
       - name: Iceberg Nessie test
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: :iceberg:iceberg-nessie:test --scan
+        run: ./gradlew :iceberg:iceberg-nessie:test --scan
 
       - name: Nessie Spark 3.3 / 2.12 Extensions test
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest --scan
+        run: ./gradlew :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest --scan
 
       - name: Nessie Spark 3.4 / 2.12 Extensions test
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.12:intTest --scan
+        run: ./gradlew :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.12:intTest --scan
 
       - name: Nessie Spark 3.5 / 2.13 Extensions test
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:test :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:intTest --scan
+        run: ./gradlew :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:test :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:intTest --scan
 
       - name: Build before publish
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: jar testClasses javadoc --scan
+        run: ./gradlew jar testClasses javadoc --scan
 
       # TODO re-enable once Iceberg/main references a Nessie release w/ Nessie PR #6197,
       #   Gradle's Maven publishing fails with the group-ID relocation.
       #
       #- name: Publish Nessie + Iceberg to local Maven repo
-      #  uses: gradle/actions/setup-gradle@v3
-      #  with:
-      #    arguments: publishLocal --scan
+      #  run: ./gradlew publishLocal --scan
 
       - name: Gather locally published versions
         run: |
@@ -158,24 +147,16 @@ jobs:
       # Scala 2.13 with a build using Iceberg from source, all Flink related code will be skipped.
 
       - name: Show Gradle projects for Scala 2.12
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: projects -DscalaVersion=2.12
+        run: ./gradlew projects -DscalaVersion=2.12
 
       - name: Tools & Integrations tests / Scala 2.12
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: intTest -DscalaVersion=2.12 --scan
+        run: ./gradlew intTest -DscalaVersion=2.12 --scan
 
       - name: Show Gradle projects for Scala 2.13
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: projects -DscalaVersion=2.13
+        run: ./gradlew projects -DscalaVersion=2.13
 
       - name: Tools & Integrations tests / Scala 2.13
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: intTest -DscalaVersion=2.13 --scan
+        run: ./gradlew intTest -DscalaVersion=2.13 --scan
 
       #- name: Checkout Presto repo
       #  uses: actions/checkout@v3
@@ -233,16 +214,16 @@ jobs:
             11
             17
 
-      - name: Show Gradle projects
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-read-only: true
-          arguments: projects -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0
+
+      - name: Show Gradle projects
+        run: ./gradlew projects -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0
 
       - name: Tools & Integrations tests
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: intTest -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0 --scan
+        run: ./gradlew intTest -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0 --scan
 
   iceberg143_nessie0780:
     name: Nessie 0.78.0 / Iceberg 1.4.3
@@ -272,16 +253,16 @@ jobs:
             11
             17
 
-      - name: Show Gradle projects
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-read-only: true
-          arguments: projects -Dnessie.versionNessie=0.78.0 -Dnessie.versionIceberg=1.4.3
+
+      - name: Show Gradle projects
+        run: ./gradlew projects -Dnessie.versionNessie=0.78.0 -Dnessie.versionIceberg=1.4.3
 
       - name: Tools & Integrations tests
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: intTest -Dnessie.versionNessie=0.78.0 -Dnessie.versionIceberg=1.4.3 --scan
+        run: ./gradlew intTest -Dnessie.versionNessie=0.78.0 -Dnessie.versionIceberg=1.4.3 --scan
 
   iceberg143_nessie0710:
     name: Nessie 0.71.0 / Iceberg 1.4.3
@@ -308,16 +289,16 @@ jobs:
           distribution: 'temurin'
           java-version: 11
 
-      - name: Show Gradle projects
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-read-only: true
-          arguments: projects -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.3
+
+      - name: Show Gradle projects
+        run: ./gradlew projects -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.3
 
       - name: Tools & Integrations tests
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: intTest -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.3 --scan
+        run: ./gradlew intTest -Dnessie.versionNessie=0.71.0 -Dnessie.versionIceberg=1.4.3 --scan
 
   iceberg131_nessie0651:
     name: Nessie 0.65.1 / Iceberg 1.3.1
@@ -344,13 +325,13 @@ jobs:
           distribution: 'temurin'
           java-version: 11
 
-      - name: Show Gradle projects
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-read-only: true
-          arguments: projects -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1
+
+      - name: Show Gradle projects
+        run: ./gradlew projects -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1
 
       - name: Tools & Integrations tests
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: intTest -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1 --scan
+        run: ./gradlew intTest -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1 --scan
