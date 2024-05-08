@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import java.util.Locale
 import java.util.Properties
 import org.gradle.internal.component.local.model.DefaultProjectComponentSelector
 
@@ -179,7 +180,11 @@ System.err.println(
 fun updateDefaultVersion(restrictions: Set<String>, project: String) {
   if (restrictions.isNotEmpty()) {
     val ver = restrictions.first()
-    if (frameworksVersions.containsKey("version${project.capitalize()}-$ver")) {
+    if (
+      frameworksVersions.containsKey(
+        "version${project.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }}-$ver"
+      )
+    ) {
       frameworksVersions["${project}DefaultVersion"] = ver
     }
   }
@@ -292,7 +297,7 @@ fun DependencySubstitution.manageNessieProjectDependency(
         req.group,
         req.module,
         prx.projectPath,
-        prx.buildName
+        prx.buildPath
       )
       val target = if (prx.projectPath == ":") substitutions.platform(prx) else prx
       useTarget(target, "Managed via $includedBuildDesc")
@@ -328,7 +333,7 @@ if (includeIcebergBuild) {
   includeBuild(icebergSourceDir) {
     name = "iceberg"
 
-    var icebergVersions = mutableMapOf<String, String>()
+    val icebergVersions = mutableMapOf<String, String>()
     // TODO These dependencies are pulled from
     //   'com.google.cloud:google-cloud-bom:0.164.0'
     // via
