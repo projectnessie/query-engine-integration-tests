@@ -15,10 +15,11 @@
  */
 package org.projectnessie.integtests.nessie.internal;
 
+import java.lang.reflect.InvocationTargetException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
+import org.projectnessie.client.NessieClientBuilder;
 import org.projectnessie.client.api.NessieApiV1;
-import org.projectnessie.client.http.HttpClientBuilder;
 import org.projectnessie.error.NessieNotFoundException;
 import org.projectnessie.model.Branch;
 
@@ -42,7 +43,31 @@ public class NessieEnv implements CloseableResource {
   }
 
   private NessieEnv() {
-    nessieApi = HttpClientBuilder.builder().withUri(NESSIE_URI).build(NessieApiV1.class);
+    NessieClientBuilder clientBuilder;
+    try {
+      clientBuilder =
+          (NessieClientBuilder)
+              NessieClientBuilder.class
+                  .getDeclaredMethod("createClientBuilder", String.class, String.class)
+                  .invoke(null, null, null);
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException x) {
+      try {
+        clientBuilder =
+            (NessieClientBuilder)
+                Class.forName("org.projectnessie.client.http.HttpClientBuilder")
+                    .getDeclaredMethod("builder")
+                    .invoke(null);
+      } catch (ClassNotFoundException
+          | NoSuchMethodException
+          | IllegalAccessException
+          | InvocationTargetException e) {
+        e.addSuppressed(x);
+        throw new RuntimeException(e);
+      }
+    }
+    // Retain this (theoretically unnecessary) cast! Otherwise `./gradlew intTest
+    // -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1` fails to compile.
+    nessieApi = (NessieApiV1) clientBuilder.withUri(NESSIE_URI).build(NessieApiV1.class);
     try {
       initialDefaultBranch = nessieApi.getDefaultBranch();
     } catch (NessieNotFoundException e) {
