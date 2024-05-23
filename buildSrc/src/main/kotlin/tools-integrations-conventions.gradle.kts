@@ -17,7 +17,6 @@
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.internal.artifacts.dependencies.DefaultImmutableVersionConstraint
 import org.gradle.internal.component.external.model.DefaultModuleComponentSelector
-import org.gradle.kotlin.dsl.provideDelegate
 
 plugins { id("org.caffinitas.gradle.testrerun") }
 
@@ -71,15 +70,13 @@ configurations.all {
           }
 
           if (nessieVersionToUse != null) {
-            val newGroupIds = nessieVersionToUse.isHigherVersionThan("0.50")
-            var useGroupId =
-              if (!newGroupIds) "org.projectnessie"
-              else if (req.group != "org.projectnessie") req.group else "org.projectnessie.nessie"
+            var groupId =
+              if (req.group != "org.projectnessie") req.group else "org.projectnessie.nessie"
 
             if (
               (req.version.isEmpty() || req.version != nessieVersionToUse) &&
                 ((req.group == "org.projectnessie" ||
-                  req.group.startsWith("org.projectnessie.nessie")) || req.group != useGroupId) &&
+                  req.group.startsWith("org.projectnessie.nessie")) || req.group != groupId) &&
                 (req.module.startsWith("nessie") || req.module == "iceberg-views")
             ) {
               // TODO get rid of the internal Gradle classes DefaultImmutableVersionConstraint +
@@ -88,7 +85,7 @@ configurations.all {
               val version = DefaultImmutableVersionConstraint.of(nessieVersionToUse)
               val target =
                 DefaultModuleComponentSelector.newSelector(
-                  DefaultModuleIdentifier.newId(useGroupId, req.module),
+                  DefaultModuleIdentifier.newId(groupId, req.module),
                   version,
                   req.attributes,
                   req.requestedCapabilities

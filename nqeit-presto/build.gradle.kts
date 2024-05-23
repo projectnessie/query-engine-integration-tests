@@ -28,6 +28,7 @@ dependencies {
   implementation("org.projectnessie:nessie-client")
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-presto-extension"))
+  compileOnly(libs.microprofile.openapi)
 
   prestoDependencies("implementation", presto)
 

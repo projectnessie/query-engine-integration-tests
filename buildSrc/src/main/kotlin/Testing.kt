@@ -106,11 +106,10 @@ fun Project.nessieConfigureTestTasks() {
           )
         } else {
           // Manage to specific Nessie version
-          val newGroupIds = nessieServerVersionToUse.isHigherVersionThan("0.50")
           add(
             "nessieQuarkusServer",
             mapOf(
-              "group" to if (newGroupIds) "org.projectnessie.nessie" else "org.projectnessie",
+              "group" to "org.projectnessie.nessie",
               "name" to "nessie-quarkus",
               "classifier" to "runner",
               "version" to nessieServerVersionToUse
