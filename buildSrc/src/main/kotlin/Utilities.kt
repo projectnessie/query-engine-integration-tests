@@ -36,7 +36,6 @@ import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withType
-import org.gradle.util.VersionNumber
 
 /**
  * Apply the given `sparkVersion` as a `strictly` version constraint and [withSparkExcludes] on the
@@ -91,7 +90,7 @@ fun Project.libsRequiredVersion(name: String): String {
 
 fun Project.dependencyVersion(key: String) = rootProject.extra[key].toString()
 
-fun Project.testLogLevel() =
+fun Project.testLogLevel(): String =
   System.getProperty(
     "test.log.level",
     when (gradle.startParameter.logLevel) {
@@ -113,7 +112,8 @@ fun loadProperties(file: File): Properties {
 
 /** Hack for Jandex-Plugin (removed later). */
 fun Project.useBuildSubDirectory(buildSubDir: String) {
-  buildDir = file("$buildDir/$buildSubDir")
+  val buildDirectory = layout.buildDirectory
+  buildDirectory.set(buildDirectory.get().dir(buildSubDir))
 
   // TODO open an issue for the Jandex plugin - it configures the task's output directory too
   //  early, so re-assigning the output directory (project.buildDir=...) to a different path
@@ -153,7 +153,7 @@ class SparkScalaVersions(
   val scalaMajorVersion: String,
   val sparkVersion: String,
   val scalaVersion: String
-) {}
+)
 
 /** Resolves the Flink and Scala major versions for all `nqeit-iceberg-flink*` projects. */
 fun Project.getFlinkVersionsForProject(): FlinkVersions {
@@ -197,7 +197,7 @@ class FlinkVersions(
   val scalaForDependencies: String,
   val flinkVersion: String,
   val hadoopVersion: String
-) {}
+)
 
 /** Resolves the Presto versions for all `nqeit-presto*` projects. */
 fun Project.getPrestoVersionsForProject(): PrestoVersions {
@@ -212,7 +212,7 @@ fun Project.usePrestoVersionsForProject(prestoMajorVersion: String): PrestoVersi
   return PrestoVersions(prestoMajorVersion, dependencyVersion("versionPresto-$prestoMajorVersion"))
 }
 
-class PrestoVersions(val prestoMajorVersion: String, val prestoVersion: String) {}
+class PrestoVersions(val prestoMajorVersion: String, val prestoVersion: String)
 
 fun Project.getCrossEngineVersionsForProject(): CrossEngineVersions {
   val splits = project.name.split("-")
@@ -228,28 +228,11 @@ fun Project.getCrossEngineVersionsForProject(): CrossEngineVersions {
   )
 }
 
-class CrossEngineVersions(val sparkScala: SparkScalaVersions, val flink: FlinkVersions) {}
+class CrossEngineVersions(val sparkScala: SparkScalaVersions, val flink: FlinkVersions)
 
 fun majorVersion(version: String): String {
   val elems = version.split(".")
   return "${elems[0]}.${elems[1]}"
-}
-
-@Suppress("DEPRECATION")
-fun String.parseVersion(): VersionNumber {
-  val version = VersionNumber.parse(this)
-  if (version.major + version.minor + version.patch + version.micro == 0) {
-    throw IllegalArgumentException("Not a valid version: $this")
-  }
-  return version
-}
-
-fun String.isHigherVersionThan(other: String): Boolean {
-  return this.parseVersion() > other.parseVersion()
-}
-
-fun String.isLowerVersionThan(other: String): Boolean {
-  return this.parseVersion() < other.parseVersion()
 }
 
 fun DependencyHandlerScope.icebergSparkDependencies(
@@ -269,25 +252,15 @@ fun DependencyHandlerScope.icebergSparkDependencies(
     "org.apache.iceberg:iceberg-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
   )
 
-  val nessieVersion = System.getProperty("nessie.versionNessie", "99.99")
-  if (nessieVersion.isLowerVersionThan("0.40")) {
-    when (sparkScala.sparkMajorVersion) {
-      "3.1" -> add(configuration, "org.projectnessie:nessie-spark-extensions")
-      "3.2" -> add(configuration, "org.projectnessie:nessie-spark-3.2-extensions")
-    }
-  } else {
-    val newGroupIds = nessieVersion.isHigherVersionThan("0.50")
-    val groupId = if (newGroupIds) "org.projectnessie.nessie-integrations" else "org.projectnessie"
-    add(
-      configuration,
-      "${groupId}:nessie-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
-    ) {
-      attributes {
-        attribute(
-          Bundling.BUNDLING_ATTRIBUTE,
-          project.objects.named(Bundling::class.java, Bundling.SHADOWED)
-        )
-      }
+  add(
+    configuration,
+    "org.projectnessie.nessie-integrations:nessie-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
+  ) {
+    attributes {
+      attribute(
+        Bundling.BUNDLING_ATTRIBUTE,
+        project.objects.named(Bundling::class.java, Bundling.SHADOWED)
+      )
     }
   }
 

@@ -52,12 +52,14 @@ fun Project.nessieConfigureSpotless() {
         val sourceLangs =
           if (dirsInSrc != null)
             dirsInSrc
+              .asSequence()
               .filter { f -> f.isDirectory }
               .map { f -> f.listFiles() }
               .filterNotNull()
               .flatMap { l -> l.filter { f -> f.isDirectory } }
               .map { f -> f.name }
               .distinct()
+              .toList()
           else listOf()
 
         if (sourceLangs.contains("antlr4")) {

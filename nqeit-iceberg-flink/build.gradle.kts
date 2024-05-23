@@ -30,6 +30,7 @@ dependencies {
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-flink-extension"))
   compileOnly(libs.findbugs.jsr305)
+  compileOnly(libs.microprofile.openapi)
 
   icebergFlinkDependencies("implementation", flink)
 

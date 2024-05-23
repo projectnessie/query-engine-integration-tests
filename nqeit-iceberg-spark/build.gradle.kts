@@ -31,6 +31,7 @@ dependencies {
   implementation("org.projectnessie:nessie-client")
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-spark-extension"))
+  compileOnly(libs.microprofile.openapi)
 
   icebergSparkDependencies("implementation", sparkScala, project)
 

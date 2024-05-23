@@ -35,6 +35,7 @@ dependencies {
   implementation(project(":nqeit-iceberg-spark-extension"))
   implementation(project(":nqeit-iceberg-flink-extension"))
   implementation(project(":nqeit-iceberg-dremio-extension"))
+  compileOnly(libs.microprofile.openapi)
   icebergSparkDependencies("implementation", crossEngine.sparkScala, project)
   icebergFlinkDependencies("implementation", crossEngine.flink)
 
