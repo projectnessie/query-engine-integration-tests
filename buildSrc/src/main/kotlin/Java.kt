@@ -51,6 +51,7 @@ fun Project.nessieConfigureJava() {
 
   tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+    options.release.set(11)
     options.compilerArgs.add("-parameters")
 
     // Required to enable incremental compilation w/ immutables, see
@@ -69,8 +70,6 @@ fun Project.nessieConfigureJava() {
     configure<JavaPluginExtension> {
       withJavadocJar()
       withSourcesJar()
-      sourceCompatibility = JavaVersion.VERSION_1_8
-      targetCompatibility = JavaVersion.VERSION_1_8
     }
   }
 
