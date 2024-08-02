@@ -21,6 +21,7 @@ on:
   schedule:
     # Run every 12 hours on week days
     - cron:  '0 4/12 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   latest:
