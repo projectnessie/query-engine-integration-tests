@@ -98,9 +98,10 @@ jobs:
             17
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+          validate-wrappers: false
 
       - name: Spotless
         run: ./gradlew spotlessCheck --scan
@@ -216,9 +217,10 @@ jobs:
             17
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: true
+          validate-wrappers: false
 
       - name: Show Gradle projects
         run: ./gradlew projects -Dnessie.versionNessie=0.93.1 -Dnessie.versionIceberg=1.6.0
@@ -255,9 +257,10 @@ jobs:
             17
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: true
+          validate-wrappers: false
 
       - name: Show Gradle projects
         run: ./gradlew projects -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0
@@ -294,9 +297,10 @@ jobs:
             17
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: true
+          validate-wrappers: false
 
       - name: Show Gradle projects
         run: ./gradlew projects -Dnessie.versionNessie=0.78.0 -Dnessie.versionIceberg=1.4.3
