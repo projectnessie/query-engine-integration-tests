@@ -346,13 +346,6 @@ if (includeIcebergBuild) {
     name = "iceberg"
 
     val icebergVersions = mutableMapOf<String, String>()
-    // TODO These dependencies are pulled from
-    //   'com.google.cloud:google-cloud-bom:0.164.0'
-    // via
-    //   'com.google.cloud:libraries-bom:24.1.0'
-    // but that somehow doesn't work in this case with includedBuild + substituted dependencies
-    icebergVersions["com.google.cloud:google-cloud-nio"] = "0.123.17"
-    icebergVersions["com.google.cloud:google-cloud-storage"] = "2.2.2"
 
     // Replace dependencies in the "root" build with projects from the included build.
     // Here: substitute declared
