@@ -329,6 +329,11 @@ if (includeNessieBuild) {
 }
 
 if (includeIcebergBuild) {
+  System.setProperty("defaultFlinkVersions", flinkRestrictions.first())
+  System.setProperty("knownFlinkVersions", flinkRestrictions.joinToString(","))
+  System.setProperty("defaultSparkVersions", sparkRestrictions.first())
+  System.setProperty("knownSparkVersions", sparkRestrictions.joinToString(","))
+
   logger.lifecycle("Including 'Iceberg' from $icebergSourceDir")
   includeBuild(icebergSourceDir) {
     name = "iceberg"
