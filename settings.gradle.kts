@@ -328,6 +328,18 @@ if (includeNessieBuild) {
   includeBuild(nessieSourceDir) { name = "nessie" }
 }
 
+System.setProperty("defaultFlinkVersions", flinkRestrictions.first())
+
+System.setProperty("knownFlinkVersions", flinkRestrictions.joinToString(","))
+
+System.setProperty("flinkVersions", flinkRestrictions.joinToString(","))
+
+System.setProperty("defaultSparkVersions", sparkRestrictions.first())
+
+System.setProperty("knownSparkVersions", sparkRestrictions.joinToString(","))
+
+System.setProperty("sparkVersions", sparkRestrictions.joinToString(","))
+
 if (includeIcebergBuild) {
   logger.lifecycle("Including 'Iceberg' from $icebergSourceDir")
   includeBuild(icebergSourceDir) {
