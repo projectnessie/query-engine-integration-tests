@@ -16,7 +16,11 @@
 
 import java.util.Locale
 import java.util.Properties
+import org.gradle.api.internal.artifacts.DefaultBuildIdentifier
+import org.gradle.api.internal.attributes.ImmutableAttributes
+import org.gradle.api.internal.project.ProjectIdentity
 import org.gradle.internal.component.local.model.DefaultProjectComponentSelector
+import org.gradle.util.Path
 
 if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11)) {
   throw GradleException("Build requires Java 11")
@@ -281,7 +285,7 @@ fun DependencySubstitution.manageNessieProjectDependency(
     ) {
       val module = if (req.module == "nessie") "" else req.module
       val targetBuild =
-        if (nessieIcebergProjects.contains(req.module)) "nessie-iceberg" else "nessie"
+        if (nessieIcebergProjects.contains(req.module)) ":nessie:nessie-iceberg" else ":nessie"
 
       // project() doesn't handle included builds :(
       // useTarget(project(":$targetBuild:$module"), "Project managed via $includedBuildDesc")
@@ -311,12 +315,15 @@ fun projectFromIncludedBuild(includedBuild: String, projectPath: String): Projec
   // TODO this is dirty, but does its job, which is to substitute dependencies to
   //  org.projectnessie:nessie-* to the projects built by the included Nessie build
   try {
-    val inclBuild = gradle.includedBuild(includedBuild)
-    val inclBuildInternal = inclBuild as org.gradle.internal.composite.IncludedBuildInternal
-    val inclBuildTarget = inclBuildInternal.target
-    val nessiePrj = inclBuildTarget.projects.getProject(org.gradle.util.Path.path(projectPath))
-    val prjIdent = nessiePrj.componentIdentifier
-    return DefaultProjectComponentSelector.newSelector(prjIdent)
+    val path = Path.path(projectPath)
+    val buildIdent = DefaultBuildIdentifier(Path.path(includedBuild))
+    val buildTreePath = Path.path("$includedBuild:$projectPath")
+    val prjIdentity = ProjectIdentity(buildIdent, buildTreePath, path, path.name ?: "root")
+    return DefaultProjectComponentSelector(
+      prjIdentity,
+      ImmutableAttributes.EMPTY,
+      emptyList<Capability>()
+    )
   } catch (x: Exception) {
     x.printStackTrace()
     throw x
