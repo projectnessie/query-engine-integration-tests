@@ -21,6 +21,7 @@ import static org.projectnessie.integtests.crossengine.TestUtils.toRow;
 
 import java.util.List;
 import org.apache.spark.sql.SparkSession;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,10 +49,14 @@ public class ITCrossEngineDremioPermissions {
 
   private static final String NAMESPACE = System.getProperty("nesqueit.namespace", "db");
   private static final String READ_ONLY_TABLE = "dremio_readonly"; // pre-created on the outside
-  private static final String EXPECTED_PERMISSION_ERROR =
-      String.format(
-          "Update entity is not allowed on reference 'main' on content '%s.%s'",
-          NAMESPACE, READ_ONLY_TABLE);
+
+  private static void assertPermissionError(ThrowableAssert.ThrowingCallable callable) {
+    assertThatThrownBy(callable)
+        .hasStackTraceContaining("Failed Access Check")
+        .hasStackTraceContaining("is not allowed")
+        .hasStackTraceContaining(
+            "on content '" + String.join(".", NAMESPACE, READ_ONLY_TABLE) + "'");
+  }
 
   @BeforeAll
   public static void setupNamepspace(
@@ -73,8 +78,7 @@ public class ITCrossEngineDremioPermissions {
         new SparkTestEngine("SPARK-READONLY", readOnlySpark, NAMESPACE);
     List<Object> newRow = toRow(777);
 
-    assertThatThrownBy(() -> readOnlySparkEngine.insertRow(READ_ONLY_TABLE, newRow))
-        .hasStackTraceContaining(EXPECTED_PERMISSION_ERROR);
+    assertPermissionError(() -> readOnlySparkEngine.insertRow(READ_ONLY_TABLE, newRow));
     assertThat(readOnlySparkEngine.selectRowsOrderedById(READ_ONLY_TABLE)).doesNotContain(newRow);
 
     DremioTestEngine dremioEngine = new DremioTestEngine("DREMIO", dremio, NAMESPACE);
@@ -92,8 +96,7 @@ public class ITCrossEngineDremioPermissions {
         new FlinkTestEngine("FLINK-READONLY", readOnlyFlink, NAMESPACE);
     List<Object> newRow = toRow(888);
 
-    assertThatThrownBy(() -> readOnlyFlinkEngine.insertRow(READ_ONLY_TABLE, newRow))
-        .hasStackTraceContaining(EXPECTED_PERMISSION_ERROR);
+    assertPermissionError(() -> readOnlyFlinkEngine.insertRow(READ_ONLY_TABLE, newRow));
     assertThat(readOnlyFlinkEngine.selectRowsOrderedById(READ_ONLY_TABLE)).doesNotContain(newRow);
 
     DremioTestEngine dremioEngine = new DremioTestEngine("DREMIO", dremio, NAMESPACE);
@@ -110,8 +113,7 @@ public class ITCrossEngineDremioPermissions {
         new DremioTestEngine("DREMIO-READONLY", readOnlyDremio, NAMESPACE);
     List<Object> newRow = toRow(999);
 
-    assertThatThrownBy(() -> readOnlyDremioEngine.insertRow(READ_ONLY_TABLE, newRow))
-        .hasStackTraceContaining(EXPECTED_PERMISSION_ERROR);
+    assertPermissionError(() -> readOnlyDremioEngine.insertRow(READ_ONLY_TABLE, newRow));
     assertThat(readOnlyDremioEngine.selectRowsOrderedById(READ_ONLY_TABLE)).doesNotContain(newRow);
 
     DremioTestEngine dremioEngine = new DremioTestEngine("DREMIO", dremio, NAMESPACE);
