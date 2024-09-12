@@ -19,7 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.projectnessie.client.NessieClientBuilder;
-import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.client.api.NessieApiV2;
 import org.projectnessie.error.NessieNotFoundException;
 import org.projectnessie.model.Branch;
 
@@ -28,9 +28,9 @@ public class NessieEnv implements CloseableResource {
   private static final int NESSIE_PORT = Integer.getInteger("quarkus.http.test-port", 19121);
   private static final String NESSIE_URI =
       System.getProperty(
-          "quarkus.http.url", String.format("http://localhost:%d/api/v1", NESSIE_PORT));
+          "quarkus.http.url", String.format("http://localhost:%d/api/v2", NESSIE_PORT));
 
-  private NessieApiV1 nessieApi;
+  private NessieApiV2 nessieApi;
   private final Branch initialDefaultBranch;
   private final long startedNanos;
   private final String startedDateTimeString;
@@ -67,7 +67,7 @@ public class NessieEnv implements CloseableResource {
     }
     // Retain this (theoretically unnecessary) cast! Otherwise `./gradlew intTest
     // -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1` fails to compile.
-    nessieApi = (NessieApiV1) clientBuilder.withUri(NESSIE_URI).build(NessieApiV1.class);
+    nessieApi = (NessieApiV2) clientBuilder.withUri(NESSIE_URI).build(NessieApiV2.class);
     try {
       initialDefaultBranch = nessieApi.getDefaultBranch();
     } catch (NessieNotFoundException e) {
@@ -90,13 +90,13 @@ public class NessieEnv implements CloseableResource {
     return startedNanos;
   }
 
-  public NessieApiV1 getApi() {
+  public NessieApiV2 getApi() {
     return nessieApi;
   }
 
   @Override
   public void close() {
-    NessieApiV1 api = nessieApi;
+    NessieApiV2 api = nessieApi;
     nessieApi = null;
     if (api != null) {
       api.close();

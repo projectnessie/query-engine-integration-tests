@@ -29,7 +29,7 @@ import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.client.api.NessieApiV2;
 import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
 import org.projectnessie.integtests.dremio.Dremio;
 import org.projectnessie.integtests.dremio.DremioHelper;
@@ -68,7 +68,7 @@ public class ITCrossEngineDremio {
   public static void setupEngines(
       @Spark SparkSession spark,
       @Flink FlinkHelper flink,
-      @NessieAPI NessieApiV1 nessie,
+      @NessieAPI NessieApiV2 nessie,
       @NessieDefaultBranch String branch,
       @Dremio DremioHelper dremioHelper)
       throws Exception {
