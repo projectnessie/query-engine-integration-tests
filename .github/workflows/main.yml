@@ -190,7 +190,7 @@ jobs:
       #      -Ddep.nessie.version=${NESSIE_VERSION}
 
   iceberg160_nessie0931:
-    name: Nessie 0.93.1 / Iceberg 1.6.0
+    name: Nessie 0.93.1 / Iceberg 1.6.1
     runs-on: ubuntu-latest
     env:
       SPARK_LOCAL_IP: localhost
@@ -224,13 +224,13 @@ jobs:
           validate-wrappers: false
 
       - name: Show Gradle projects
-        run: ./gradlew projects -Dnessie.versionNessie=0.93.1 -Dnessie.versionIceberg=1.6.0
+        run: ./gradlew projects -Dnessie.versionNessie=0.93.1 -Dnessie.versionIceberg=1.6.1
 
       - name: Tools & Integrations tests
-        run: ./gradlew intTest -Dnessie.versionNessie=0.93.1 -Dnessie.versionIceberg=1.6.0 --scan
+        run: ./gradlew intTest -Dnessie.versionNessie=0.93.1 -Dnessie.versionIceberg=1.6.1 --scan
 
   iceberg160_nessie0790:
-    name: Nessie 0.79.0 / Iceberg 1.5.0
+    name: Nessie 0.79.0 / Iceberg 1.5.2
     runs-on: ubuntu-latest
     env:
       SPARK_LOCAL_IP: localhost
@@ -264,10 +264,10 @@ jobs:
           validate-wrappers: false
 
       - name: Show Gradle projects
-        run: ./gradlew projects -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0
+        run: ./gradlew projects -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.2
 
       - name: Tools & Integrations tests
-        run: ./gradlew intTest -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.0 --scan
+        run: ./gradlew intTest -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.2 --scan
 
   iceberg143_nessie0780:
     name: Nessie 0.78.0 / Iceberg 1.4.3
