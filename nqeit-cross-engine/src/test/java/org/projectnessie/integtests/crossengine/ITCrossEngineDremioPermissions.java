@@ -46,7 +46,7 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
 })
 public class ITCrossEngineDremioPermissions {
 
-  private static final String NAMESPACE = "db";
+  private static final String NAMESPACE = System.getProperty("nqeit.namespace", "db");
   private static final String READ_ONLY_TABLE = "dremio_readonly"; // pre-created on the outside
   private static final String EXPECTED_PERMISSION_ERROR =
       String.format(
