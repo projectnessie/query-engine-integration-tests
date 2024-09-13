@@ -50,7 +50,7 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ITCrossEngine {
 
-  private static final String NAMESPACE = System.getProperty("nqeit.namespace", "db");
+  private static final String NAMESPACE = System.getProperty("nesqueit.namespace", "db");
 
   private static String sparkTableIdentifier(String tableName) {
     return String.format("nessie.%s.%s", NAMESPACE, tableName);
