@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
-import org.projectnessie.client.api.NessieApiV2;
+import org.projectnessie.client.api.NessieApiV1;
 import org.projectnessie.model.Branch;
 import org.projectnessie.model.Reference;
 import org.projectnessie.model.Tag;
@@ -47,7 +47,7 @@ public class ReferencesHelper implements CloseableResource {
     if (Boolean.getBoolean("nessie.test.keepReferences")) {
       return;
     }
-    NessieApiV2 api = env.getApi();
+    NessieApiV1 api = env.getApi();
     for (Reference ref : api.getAllReferences().get().getReferences()) {
       if (ref instanceof Branch && generatedReferenceNames.remove(ref.getName())) {
         api.deleteBranch().branchName(ref.getName()).hash(ref.getHash()).delete();
