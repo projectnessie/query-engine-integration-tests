@@ -50,12 +50,18 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ITCrossEngine {
 
+  private static final String NAMESPACE = System.getProperty("nesqueit.namespace", "db");
+
+  private static String sparkTableIdentifier(String tableName) {
+    return String.format("nessie.%s.%s", NAMESPACE, tableName);
+  }
+
   @Order(20)
   @Test
   public void createNamespace(@NessieAPI NessieApiV1 nessie, @NessieDefaultBranch String branch)
       throws Exception {
     try {
-      nessie.createNamespace().namespace("db").refName(branch).create();
+      nessie.createNamespace().namespace(NAMESPACE).refName(branch).create();
     } catch (NessieNamespaceAlreadyExistsException ignore) {
       // ignore
     }
@@ -64,7 +70,7 @@ public class ITCrossEngine {
   @Order(100)
   @Test
   public void createTables(@Spark SparkSession spark) {
-    spark.sql("CREATE TABLE nessie.db.from_spark (id int, val string)");
+    spark.sql(format("CREATE TABLE %s (id int, val string)", sparkTableIdentifier("from_spark")));
   }
 
   @Order(101)
@@ -87,7 +93,7 @@ public class ITCrossEngine {
   @ParameterizedTest
   @MethodSource("tables")
   public void insertIntoSpark(String table, @Spark SparkSession spark) {
-    spark.sql(format("INSERT INTO nessie.db.%s select 100, \"from-spark\"", table));
+    spark.sql(format("INSERT INTO %s select 100, \"from-spark\"", sparkTableIdentifier(table)));
     tableAddRow(table, 100, "from-spark");
   }
 
@@ -105,7 +111,10 @@ public class ITCrossEngine {
   @MethodSource("tables")
   public void selectFromSpark(String table, @Spark SparkSession spark) {
     assertThat(
-            spark.sql(format("SELECT id, val FROM nessie.db.%s", table)).collectAsList().stream()
+            spark
+                .sql(format("SELECT id, val FROM %s", sparkTableIdentifier(table)))
+                .collectAsList()
+                .stream()
                 .map(r -> asList(r.get(0), r.get(1))))
         .containsExactlyInAnyOrderElementsOf(tableRows.get(table));
   }
@@ -123,7 +132,7 @@ public class ITCrossEngine {
   @ParameterizedTest
   @MethodSource("tables")
   public void insertIntoSpark2(String table, @Spark SparkSession spark) {
-    spark.sql(format("INSERT INTO nessie.db.%s select 101, \"from-spark\"", table));
+    spark.sql(format("INSERT INTO %s select 101, \"from-spark\"", sparkTableIdentifier(table)));
     tableAddRow(table, 101, "from-spark");
   }
 
@@ -141,7 +150,10 @@ public class ITCrossEngine {
   @MethodSource("tables")
   public void selectFromSpark2(String table, @Spark SparkSession spark) {
     assertThat(
-            spark.sql(format("SELECT id, val FROM nessie.db.%s", table)).collectAsList().stream()
+            spark
+                .sql(format("SELECT id, val FROM %s", sparkTableIdentifier(table)))
+                .collectAsList()
+                .stream()
                 .map(r -> asList(r.get(0), r.get(1))))
         .containsExactlyInAnyOrderElementsOf(tableRows.get(table));
   }

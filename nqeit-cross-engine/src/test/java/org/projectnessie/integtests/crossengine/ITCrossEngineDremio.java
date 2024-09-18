@@ -51,7 +51,7 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
 })
 public class ITCrossEngineDremio {
 
-  private static final String NAMESPACE = "db";
+  private static final String NAMESPACE = System.getProperty("nesqueit.namespace", "db");
   private static final String DREMIO_TABLE = "from_dremio";
   private static final String SPARK_TABLE = "from_spark";
   private static final String FLINK_TABLE = "from_flink";

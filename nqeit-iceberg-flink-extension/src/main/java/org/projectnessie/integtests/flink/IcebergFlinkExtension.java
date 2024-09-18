@@ -102,7 +102,7 @@ public class IcebergFlinkExtension implements ParameterResolver {
   private static class FlinkPerRun implements CloseableResource, FlinkHelper {
     private final FlinkHolder flinkHolder;
     private final String catalogName;
-    private final String databaseName = "db";
+    private final String databaseName = System.getProperty("nesqueit.namespace", "db");
 
     static FlinkPerRun get(ExtensionContext extensionContext, Flink flinkConfig) {
       return extensionContext
