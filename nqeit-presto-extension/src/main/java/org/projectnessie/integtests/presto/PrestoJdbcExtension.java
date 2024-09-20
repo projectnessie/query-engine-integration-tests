@@ -180,11 +180,13 @@ public class PrestoJdbcExtension implements ParameterResolver {
         FileFormat format = new IcebergConfig().getFileFormat();
 
         NessieEnv env = NessieEnv.get(extensionContext);
+        // presto with iceberg 1.4.x only supports the v1 endpoint
+        String nessieUri = env.getNessieUri().replaceAll("api/v2", "api/v1");
 
         Map<String, String> extraConnectorProperties =
             ImmutableMap.<String, String>builder()
                 .put("iceberg.catalog.type", CatalogType.NESSIE.name())
-                .put("iceberg.nessie.uri", env.getNessieUri())
+                .put("iceberg.nessie.uri", nessieUri)
                 .build();
 
         Map<String, String> icebergProperties =

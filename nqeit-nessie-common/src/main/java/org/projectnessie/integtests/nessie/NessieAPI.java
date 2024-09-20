@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * Used to get an instance of {@link org.projectnessie.client.api.NessieApi} (like {@link
- * org.projectnessie.client.api.NessieApiV1}) via a test method parameter.
+ * org.projectnessie.client.api.NessieApiV2}) via a test method parameter.
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.client.api.NessieApiV2;
 import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
 import org.projectnessie.integtests.nessie.NessieAPI;
 import org.projectnessie.integtests.nessie.NessieDefaultBranch;
@@ -36,7 +36,7 @@ public class ITIcebergFlink {
   @Order(20)
   @Test
   public void createNamespace(
-      @NessieAPI NessieApiV1 nessie, @NessieDefaultBranch String branch, @Flink FlinkHelper flink)
+      @NessieAPI NessieApiV2 nessie, @NessieDefaultBranch String branch, @Flink FlinkHelper flink)
       throws Exception {
     try {
       nessie.createNamespace().namespace(flink.databaseName()).refName(branch).create();

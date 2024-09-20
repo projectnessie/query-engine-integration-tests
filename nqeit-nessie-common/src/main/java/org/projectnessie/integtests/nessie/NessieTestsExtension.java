@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.projectnessie.client.api.NessieApi;
+import org.projectnessie.client.api.NessieApiV2;
 import org.projectnessie.integtests.nessie.internal.DefaultBranchPerRun;
 import org.projectnessie.integtests.nessie.internal.NessieEnv;
 import org.projectnessie.integtests.nessie.internal.ReferencesHelper;
@@ -78,6 +79,9 @@ public class NessieTestsExtension implements ParameterResolver, BeforeEachCallba
       return ReferencesHelper.get(extensionContext).generateRefNameFor(name, extensionContext);
     }
     if (parameterContext.isAnnotated(NessieAPI.class)) {
+      if (NessieApiV2.class.isAssignableFrom(parameterContext.getParameter().getType())) {
+        return NessieEnv.get(extensionContext).getApiV2();
+      }
       return NessieEnv.get(extensionContext).getApi();
     }
     if (parameterContext.isAnnotated(NessieDefaultBranch.class)) {

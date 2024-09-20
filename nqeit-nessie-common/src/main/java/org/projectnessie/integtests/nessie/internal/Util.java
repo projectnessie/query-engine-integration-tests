@@ -70,6 +70,7 @@ public class Util {
 
     params.put("ref", DefaultBranchPerRun.get(extensionContext).getDefaultBranch().getName());
     params.put("uri", NessieEnv.get(extensionContext).getNessieUri());
+    params.put("client-api-version", "2");
 
     applySystemPropertiesByPrefix(params, "nessie.client.");
 

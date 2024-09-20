@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.projectnessie.client.NessieClientBuilder;
 import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.client.api.NessieApiV2;
 import org.projectnessie.error.NessieNotFoundException;
 import org.projectnessie.model.Branch;
 
@@ -28,9 +29,10 @@ public class NessieEnv implements CloseableResource {
   private static final int NESSIE_PORT = Integer.getInteger("quarkus.http.test-port", 19121);
   private static final String NESSIE_URI =
       System.getProperty(
-          "quarkus.http.url", String.format("http://localhost:%d/api/v1", NESSIE_PORT));
+          "quarkus.http.url", String.format("http://localhost:%d/api/v2", NESSIE_PORT));
 
-  private NessieApiV1 nessieApi;
+  private NessieApiV1 nessieApiV1;
+  private NessieApiV2 nessieApiV2;
   private final Branch initialDefaultBranch;
   private final long startedNanos;
   private final String startedDateTimeString;
@@ -66,14 +68,18 @@ public class NessieEnv implements CloseableResource {
       }
     }
     // Retain this (theoretically unnecessary) cast! Otherwise `./gradlew intTest
-    // -Dnessie.versionNessie=0.65.1 -Dnessie.versionIceberg=1.3.1` fails to compile.
-    nessieApi = (NessieApiV1) clientBuilder.withUri(NESSIE_URI).build(NessieApiV1.class);
+    if (NESSIE_URI.contains("api/v1")) {
+      nessieApiV1 = clientBuilder.withUri(NESSIE_URI).build(NessieApiV1.class);
+    } else {
+      nessieApiV2 = clientBuilder.withUri(NESSIE_URI).build(NessieApiV2.class);
+    }
     try {
-      initialDefaultBranch = nessieApi.getDefaultBranch();
+      initialDefaultBranch = getApi().getDefaultBranch();
     } catch (NessieNotFoundException e) {
-      nessieApi.close();
+      getApi().close();
       throw new RuntimeException(e);
     }
+
     startedNanos = System.nanoTime() % 1_000_000;
     startedDateTimeString = Util.dateTimeString();
   }
@@ -91,15 +97,30 @@ public class NessieEnv implements CloseableResource {
   }
 
   public NessieApiV1 getApi() {
-    return nessieApi;
+    if (nessieApiV1 == null) {
+      return getApiV2();
+    }
+    return nessieApiV1;
+  }
+
+  public NessieApiV2 getApiV2() {
+    if (nessieApiV2 == null) {
+      throw new IllegalStateException("requesting V2 api aginst a V1 endpoint");
+    }
+    return nessieApiV2;
   }
 
   @Override
   public void close() {
-    NessieApiV1 api = nessieApi;
-    nessieApi = null;
-    if (api != null) {
-      api.close();
+    NessieApiV1 apiV1 = nessieApiV1;
+    nessieApiV1 = null;
+    if (apiV1 != null) {
+      apiV1.close();
+    }
+    NessieApiV2 apiV2 = nessieApiV2;
+    nessieApiV2 = null;
+    if (apiV2 != null) {
+      apiV2.close();
     }
   }
 

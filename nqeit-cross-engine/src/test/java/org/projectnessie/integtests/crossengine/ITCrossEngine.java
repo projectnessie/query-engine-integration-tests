@@ -35,7 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.client.api.NessieApiV2;
 import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
 import org.projectnessie.integtests.flink.Flink;
 import org.projectnessie.integtests.flink.FlinkHelper;
@@ -58,7 +58,7 @@ public class ITCrossEngine {
 
   @Order(20)
   @Test
-  public void createNamespace(@NessieAPI NessieApiV1 nessie, @NessieDefaultBranch String branch)
+  public void createNamespace(@NessieAPI NessieApiV2 nessie, @NessieDefaultBranch String branch)
       throws Exception {
     try {
       nessie.createNamespace().namespace(NAMESPACE).refName(branch).create();

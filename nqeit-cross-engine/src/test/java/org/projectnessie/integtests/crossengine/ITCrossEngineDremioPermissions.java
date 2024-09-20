@@ -24,7 +24,7 @@ import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.projectnessie.client.api.NessieApiV1;
+import org.projectnessie.client.api.NessieApiV2;
 import org.projectnessie.error.NessieNamespaceAlreadyExistsException;
 import org.projectnessie.integtests.dremio.Dremio;
 import org.projectnessie.integtests.dremio.DremioHelper;
@@ -55,7 +55,7 @@ public class ITCrossEngineDremioPermissions {
 
   @BeforeAll
   public static void setupNamepspace(
-      @NessieAPI NessieApiV1 nessie, @NessieDefaultBranch String branch) throws Exception {
+      @NessieAPI NessieApiV2 nessie, @NessieDefaultBranch String branch) throws Exception {
     try {
       nessie.createNamespace().namespace(NAMESPACE).refName(branch).create();
     } catch (NessieNamespaceAlreadyExistsException ignore) {
