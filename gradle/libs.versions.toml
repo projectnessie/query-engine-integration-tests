@@ -57,7 +57,7 @@ jackson-core = { module = "com.fasterxml.jackson.core:jackson-core" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
 jandex = { module = "org.jboss:jandex", version.ref = "jandex" }
 jandex-plugin = { module = "com.github.vlsi.gradle:jandex-plugin", version.ref = "jandexPlugin" }
-jetbrains-annotations = { module = "org.jetbrains:annotations", version = "24.1.0" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version = "25.0.0" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
