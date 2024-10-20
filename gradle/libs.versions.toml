@@ -2,7 +2,7 @@
 awssdk = "2.24.10"
 checkstyle = "10.18.2"
 errorprone = "2.34.0"
-errorpronePlugin = "4.0.1"
+errorpronePlugin = "4.1.0"
 errorproneSlf4j = "0.1.28"
 googleJavaFormat = "1.24.0"
 guava = "33.3.1-jre"
