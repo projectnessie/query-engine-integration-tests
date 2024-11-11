@@ -51,6 +51,7 @@ configurations.all {
         val icebergVersionToUse = System.getProperty("nessie.versionIceberg")
         val req = requested
         if (req is ModuleComponentSelector) {
+          var moduleComponentSelector = req as DefaultModuleComponentSelector
           if (
             icebergVersionToUse != null &&
               req.group == "org.apache.iceberg" &&
@@ -64,7 +65,7 @@ configurations.all {
                 req.moduleIdentifier,
                 version,
                 req.attributes,
-                req.requestedCapabilities
+                moduleComponentSelector.getCapabilitySelectors()
               )
             useTarget(target, "Managed Iceberg version to $version (attributes: ${req.attributes})")
           }
@@ -88,7 +89,7 @@ configurations.all {
                   DefaultModuleIdentifier.newId(groupId, req.module),
                   version,
                   req.attributes,
-                  req.requestedCapabilities
+                  moduleComponentSelector.getCapabilitySelectors()
                 )
               useTarget(
                 target,

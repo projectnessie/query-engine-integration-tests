@@ -319,11 +319,17 @@ fun projectFromIncludedBuild(includedBuild: String, projectPath: String): Projec
     val buildIdent = DefaultBuildIdentifier(Path.path(includedBuild))
     val buildTreePath = Path.path("$includedBuild:$projectPath")
     val prjIdentity = ProjectIdentity(buildIdent, buildTreePath, path, path.name ?: "root")
-    return DefaultProjectComponentSelector(
+    // Gradle 8.11 changed the signature of DefaultProjectComponentSelector to take a Guava
+    // ImmutableSet as the 3rd parameter, but there's no way to simply access Guava from
+    // this settings.gradle.kts - therefore the whole Java reflection mess here...
+    val classDefaultProjectComponentSelector = DefaultProjectComponentSelector::class.java
+    val ctor = classDefaultProjectComponentSelector.getDeclaredConstructors()[0]
+    return ctor.newInstance(
       prjIdentity,
       ImmutableAttributes.EMPTY,
-      emptyList<Capability>()
-    )
+      // Guava's ImmutableSet
+      ctor.getParameterTypes()[2].getDeclaredMethod("of").invoke(null)
+    ) as ProjectComponentSelector
   } catch (x: Exception) {
     x.printStackTrace()
     throw x
