@@ -29,6 +29,6 @@ dependencies {
   implementation(platform(libs.junit.bom))
   implementation(libs.junit.jupiter.engine)
 
-  implementation("org.projectnessie:nessie-client")
+  implementation("org.projectnessie.nessie:nessie-client")
   implementation(libs.findbugs.jsr305)
 }

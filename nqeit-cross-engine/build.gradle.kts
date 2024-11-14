@@ -30,7 +30,7 @@ dependencies {
   testCompileOnly(libs.jetbrains.annotations)
   testCompileOnly(libs.errorprone.annotations)
 
-  implementation("org.projectnessie:nessie-client")
+  implementation("org.projectnessie.nessie:nessie-client")
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-spark-extension"))
   implementation(project(":nqeit-iceberg-flink-extension"))
