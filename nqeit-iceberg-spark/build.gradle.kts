@@ -28,7 +28,7 @@ dependencies {
 
   testCompileOnly(platform(rootProject))
 
-  implementation("org.projectnessie:nessie-client")
+  implementation("org.projectnessie.nessie:nessie-client")
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-spark-extension"))
   compileOnly(libs.microprofile.openapi)
