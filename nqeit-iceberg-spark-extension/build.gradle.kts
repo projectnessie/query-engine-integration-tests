@@ -23,7 +23,7 @@ plugins {
 val sparkScala =
   useSparkScalaVersionsForProject(
     rootProject.extra["sparkDefaultVersion"].toString(),
-    rootProject.extra["scalaDefaultVersion"].toString()
+    rootProject.extra["scalaDefaultVersion"].toString(),
   )
 
 dependencies {

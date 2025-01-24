@@ -57,7 +57,7 @@ develocity {
           "GITHUB_RUN_ID",
           "GITHUB_RUN_NUMBER",
           "GITHUB_SHA",
-          "GITHUB_WORKFLOW"
+          "GITHUB_WORKFLOW",
         )
         .forEach { e ->
           val v = System.getenv(e)
@@ -136,7 +136,7 @@ val scalaRestrictionsForIceberg = versionConstraints("scala", "iceberg", iceberg
 val scalaRestrictions =
   versionRestrictions(
     versionRestrictions(scalaRestrictionsForNessie, scalaRestrictionsForIceberg),
-    scalaRestrictionsForSourceBuild
+    scalaRestrictionsForSourceBuild,
   )
 
 updateDefaultVersion(scalaRestrictions, "scala")
@@ -200,7 +200,7 @@ fun updateDefaultVersion(restrictions: Set<String>, project: String) {
  */
 fun versionRestrictions(
   currentRestrictions: Set<String>,
-  intersectRestrictions: Set<String>
+  intersectRestrictions: Set<String>,
 ): Set<String> {
   if (currentRestrictions.isEmpty()) {
     return intersectRestrictions
@@ -217,7 +217,7 @@ fun restrictedVersion(restrictions: Set<String>, majorVersion: String): Boolean 
 fun versionConstraints(
   restricted: String,
   restricting: String,
-  restrictingMajorVersion: String
+  restrictingMajorVersion: String,
 ): Set<String> =
   frameworksVersions
     .getProperty("constraints.${restricted}Versions.$restricting-$restrictingMajorVersion", "")
@@ -273,7 +273,7 @@ val includedNessieVersion =
 
 fun DependencySubstitution.manageNessieProjectDependency(
   includedBuildDesc: String,
-  substitutions: DependencySubstitutions
+  substitutions: DependencySubstitutions,
 ): Boolean {
   val req = requested
   if (req is ModuleComponentSelector) {
@@ -301,7 +301,7 @@ fun DependencySubstitution.manageNessieProjectDependency(
         req.group,
         req.module,
         prx.projectPath,
-        prx.buildPath
+        prx.buildPath,
       )
       val target = if (prx.projectPath == ":") substitutions.platform(prx) else prx
       useTarget(target, "Managed via $includedBuildDesc")
@@ -328,7 +328,7 @@ fun projectFromIncludedBuild(includedBuild: String, projectPath: String): Projec
       prjIdentity,
       ImmutableAttributes.EMPTY,
       // Guava's ImmutableSet
-      ctor.getParameterTypes()[2].getDeclaredMethod("of").invoke(null)
+      ctor.getParameterTypes()[2].getDeclaredMethod("of").invoke(null),
     ) as ProjectComponentSelector
   } catch (x: Exception) {
     x.printStackTrace()
@@ -371,7 +371,7 @@ if (includeIcebergBuild) {
           "iceberg-core",
           "iceberg-hive-metastore",
           "iceberg-nessie",
-          "iceberg-parquet"
+          "iceberg-parquet",
         )
         .forEach { moduleName ->
           substitute(module("org.apache.iceberg:$moduleName")).using(project(":$moduleName"))
@@ -416,7 +416,7 @@ if (includeIcebergBuild) {
                 "Nessie/Iceberg - managed {}:{} with version {}",
                 req.group,
                 req.module,
-                ver
+                ver,
               )
               useTarget(module("${req.group}:${req.module}:${ver}"), "Managed via Nessie")
             }
@@ -501,7 +501,7 @@ for (crossEngineSetup in
   }
   includeProject(
     "nqeit-cross-engine-$sparkMajor-$scalaMajor-$flinkMajor",
-    file("nqeit-cross-engine")
+    file("nqeit-cross-engine"),
   )
   if (ideSyncActive) {
     break

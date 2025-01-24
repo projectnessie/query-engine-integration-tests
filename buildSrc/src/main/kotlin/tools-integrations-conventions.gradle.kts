@@ -54,7 +54,7 @@ configurations.all {
           ) {
             useTarget(
               "${req.group}:${req.module}:$icebergVersionToUse",
-              "Managed Iceberg version to $version (attributes: ${req.attributes})"
+              "Managed Iceberg version to $version (attributes: ${req.attributes})",
             )
           }
 
@@ -70,7 +70,7 @@ configurations.all {
           ) {
             useTarget(
               "${req.group}:${req.module}:$nessieVersionToUse",
-              "Managed Nessie version to $version (attributes: ${req.attributes})"
+              "Managed Nessie version to $version (attributes: ${req.attributes})",
             )
           }
         }

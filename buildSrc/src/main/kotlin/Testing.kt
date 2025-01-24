@@ -92,7 +92,7 @@ fun Project.nessieConfigureTestTasks() {
         val nessieServerVersionToUse =
           System.getProperty(
             "nessie.versionNessieServer",
-            System.getProperty("nessie.versionNessie")
+            System.getProperty("nessie.versionNessie"),
           )
         if (nessieServerVersionToUse == null) {
           // Manage to included Nessie build
@@ -101,8 +101,8 @@ fun Project.nessieConfigureTestTasks() {
             mapOf(
               "group" to "org.projectnessie.nessie",
               "name" to "nessie-quarkus",
-              "configuration" to "quarkusRunner"
-            )
+              "configuration" to "quarkusRunner",
+            ),
           )
         } else {
           // Manage to specific Nessie version
@@ -112,8 +112,8 @@ fun Project.nessieConfigureTestTasks() {
               "group" to "org.projectnessie.nessie",
               "name" to "nessie-quarkus",
               "classifier" to "runner",
-              "version" to nessieServerVersionToUse
-            )
+              "version" to nessieServerVersionToUse,
+            ),
           )
         }
       }
