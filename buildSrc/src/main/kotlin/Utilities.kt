@@ -100,7 +100,7 @@ fun Project.testLogLevel(): String =
       LogLevel.WARN -> "WARN"
       LogLevel.QUIET,
       LogLevel.ERROR -> "ERROR"
-    }
+    },
   )
 
 /** Just load [Properties] from a [File]. */
@@ -138,13 +138,13 @@ fun Project.getSparkScalaVersionsForProject(): SparkScalaVersions {
 
 fun Project.useSparkScalaVersionsForProject(
   sparkMajorVersion: String,
-  scalaMajorVersion: String
+  scalaMajorVersion: String,
 ): SparkScalaVersions {
   return SparkScalaVersions(
     sparkMajorVersion,
     scalaMajorVersion,
     dependencyVersion("versionSpark-$sparkMajorVersion"),
-    dependencyVersion("versionScala-$scalaMajorVersion")
+    dependencyVersion("versionScala-$scalaMajorVersion"),
   )
 }
 
@@ -152,7 +152,7 @@ class SparkScalaVersions(
   val sparkMajorVersion: String,
   val scalaMajorVersion: String,
   val sparkVersion: String,
-  val scalaVersion: String
+  val scalaVersion: String,
 )
 
 /** Resolves the Flink and Scala major versions for all `nqeit-iceberg-flink*` projects. */
@@ -171,7 +171,7 @@ fun Project.useFlinkVersionsForProject(flinkMajorVersion: String): FlinkVersions
 
 fun Project.useFlinkVersionsForProject(
   flinkMajorVersion: String,
-  scalaMajorVersion: String
+  scalaMajorVersion: String,
 ): FlinkVersions {
   val scalaForDependencies = dependencyVersion("flink-scalaForDependencies-$flinkMajorVersion")
   return useFlinkVersionsForProject(flinkMajorVersion, scalaMajorVersion, scalaForDependencies)
@@ -180,14 +180,14 @@ fun Project.useFlinkVersionsForProject(
 fun Project.useFlinkVersionsForProject(
   flinkMajorVersion: String,
   scalaMajorVersion: String,
-  scalaForDependencies: String
+  scalaForDependencies: String,
 ): FlinkVersions {
   return FlinkVersions(
     flinkMajorVersion,
     scalaMajorVersion,
     scalaForDependencies,
     dependencyVersion("versionFlink-$flinkMajorVersion"),
-    dependencyVersion("versionFlinkHadoop-$flinkMajorVersion")
+    dependencyVersion("versionFlinkHadoop-$flinkMajorVersion"),
   )
 }
 
@@ -196,7 +196,7 @@ class FlinkVersions(
   val scalaMajorVersion: String,
   val scalaForDependencies: String,
   val flinkVersion: String,
-  val hadoopVersion: String
+  val hadoopVersion: String,
 )
 
 /** Resolves the Presto versions for all `nqeit-presto*` projects. */
@@ -224,7 +224,7 @@ fun Project.getCrossEngineVersionsForProject(): CrossEngineVersions {
 
   return CrossEngineVersions(
     useSparkScalaVersionsForProject(sparkMajorVersion, scalaMajorVersion),
-    useFlinkVersionsForProject(flinkMajorVersion, scalaMajorVersion)
+    useFlinkVersionsForProject(flinkMajorVersion, scalaMajorVersion),
   )
 }
 
@@ -238,28 +238,28 @@ fun majorVersion(version: String): String {
 fun DependencyHandlerScope.icebergSparkDependencies(
   configuration: String,
   sparkScala: SparkScalaVersions,
-  project: Project
+  project: Project,
 ) {
   add(configuration, "org.apache.iceberg:iceberg-api")
   add(configuration, "org.apache.iceberg:iceberg-aws")
   add(configuration, "org.apache.iceberg:iceberg-nessie")
   add(
     configuration,
-    "org.apache.iceberg:iceberg-spark-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
+    "org.apache.iceberg:iceberg-spark-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}",
   )
   add(
     configuration,
-    "org.apache.iceberg:iceberg-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
+    "org.apache.iceberg:iceberg-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}",
   )
 
   add(
     configuration,
-    "org.projectnessie.nessie-integrations:nessie-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}"
+    "org.projectnessie.nessie-integrations:nessie-spark-extensions-${sparkScala.sparkMajorVersion}_${sparkScala.scalaMajorVersion}",
   ) {
     attributes {
       attribute(
         Bundling.BUNDLING_ATTRIBUTE,
-        project.objects.named(Bundling::class.java, Bundling.SHADOWED)
+        project.objects.named(Bundling::class.java, Bundling.SHADOWED),
       )
     }
   }
@@ -296,16 +296,16 @@ fun DependencyHandlerScope.icebergFlinkDependencies(configuration: String, flink
   add(configuration, "org.apache.flink:flink-runtime:${flink.flinkVersion}")
   add(
     configuration,
-    "org.apache.flink:flink-streaming-java${flink.scalaForDependencies}:${flink.flinkVersion}"
+    "org.apache.flink:flink-streaming-java${flink.scalaForDependencies}:${flink.flinkVersion}",
   )
   add(
     configuration,
-    "org.apache.flink:flink-table-planner_${flink.scalaMajorVersion}:${flink.flinkVersion}"
+    "org.apache.flink:flink-table-planner_${flink.scalaMajorVersion}:${flink.flinkVersion}",
   )
   add(configuration, "org.apache.flink:flink-table-api-java:${flink.flinkVersion}")
   add(
     configuration,
-    "org.apache.flink:flink-table-api-java-bridge${flink.scalaForDependencies}:${flink.flinkVersion}"
+    "org.apache.flink:flink-table-api-java-bridge${flink.scalaForDependencies}:${flink.flinkVersion}",
   )
   add(configuration, "org.apache.flink:flink-connector-base:${flink.flinkVersion}")
   add(configuration, "org.apache.flink:flink-connector-files:${flink.flinkVersion}")
@@ -316,7 +316,7 @@ fun DependencyHandlerScope.icebergFlinkDependencies(configuration: String, flink
   }
   add(
     configuration,
-    "org.apache.flink:flink-test-utils${flink.scalaForDependencies}:${flink.flinkVersion}"
+    "org.apache.flink:flink-test-utils${flink.scalaForDependencies}:${flink.flinkVersion}",
   )
 
   add("testRuntimeOnly", "org.apache.hadoop:hadoop-common:${flink.hadoopVersion}")
@@ -331,6 +331,6 @@ fun DependencyHandlerScope.prestoDependencies(configuration: String, presto: Pre
 
   add(
     "test${configuration.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}",
-    "com.facebook.presto:presto-tests:${presto.prestoVersion}"
+    "com.facebook.presto:presto-tests:${presto.prestoVersion}",
   )
 }

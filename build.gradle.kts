@@ -24,7 +24,7 @@ mapOf(
     "versionErrorProneCore" to libs.versions.errorprone.get(),
     "versionErrorProneSlf4j" to libs.versions.errorproneSlf4j.get(),
     "versionGoogleJavaFormat" to libs.versions.googleJavaFormat.get(),
-    "versionJandex" to libs.versions.jandex.get()
+    "versionJandex" to libs.versions.jandex.get(),
   )
   .plus(loadProperties(file("build/frameworks-versions-effective.properties")))
   .forEach { (k, v) -> extra[k.toString()] = v }
