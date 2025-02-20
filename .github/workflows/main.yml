@@ -113,17 +113,11 @@ jobs:
       - name: Iceberg Nessie test
         run: ./gradlew :iceberg:iceberg-nessie:test --scan
 
-      - name: Nessie Spark 3.3 / 2.12 Extensions test
-        run: ./gradlew -DscalaVersion=2.12 :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.3_2.12:intTest --scan
-
       - name: Nessie Spark 3.4 / 2.12 Extensions test
         run: ./gradlew -DscalaVersion=2.13 :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.13:test :nessie:nessie-iceberg:nessie-spark-extensions-3.4_2.13:intTest --scan
 
-      - name: Nessie Spark 3.5 / 2.12 Extensions test
-        run: ./gradlew -DscalaVersion=2.12 :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.12:test :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.12:intTest --scan
-      # TODO Revert the change to Scala 2.12 after we have an Iceberg release with https://github.com/apache/iceberg/pull/11520 (Iceberg 1.8 probably)
-      #- name: Nessie Spark 3.5 / 2.13 Extensions test
-      #  run: ./gradlew -DscalaVersion=2.13 :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:test :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:intTest --scan
+      - name: Nessie Spark 3.5 / 2.13 Extensions test
+        run: ./gradlew -DscalaVersion=2.13 :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:test :nessie:nessie-iceberg:nessie-spark-extensions-3.5_2.13:intTest --scan
 
       - name: Build before publish
         run: ./gradlew jar testClasses javadoc --scan
@@ -192,8 +186,8 @@ jobs:
       #      -Ddep.iceberg.version=${ICEBERG_VERSION} \
       #      -Ddep.nessie.version=${NESSIE_VERSION}
 
-  iceberg160_nessie0931:
-    name: Nessie 0.93.1 / Iceberg 1.6.1
+  iceberg180_nessie01030:
+    name: Nessie 0.103.0 / Iceberg 1.8.0
     runs-on: ubuntu-24.04
     env:
       SPARK_LOCAL_IP: localhost
@@ -216,9 +210,7 @@ jobs:
         with:
           distribution: 'temurin'
           # Java 17 required for Nessie build, Java 11 required for Flink & Presto
-          java-version: |
-            11
-            17
+          java-version: 21
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -227,10 +219,10 @@ jobs:
           validate-wrappers: false
 
       - name: Show Gradle projects
-        run: ./gradlew projects -Dnessie.versionNessie=0.93.1 -Dnessie.versionIceberg=1.6.1
+        run: ./gradlew projects -Dnessie.versionNessie=0.103.0 -Dnessie.versionIceberg=1.8.0
 
       - name: Tools & Integrations tests
-        run: ./gradlew intTest -Dnessie.versionNessie=0.93.1 -Dnessie.versionIceberg=1.6.1 --scan
+        run: ./gradlew intTest -Dnessie.versionNessie=0.103.0 -Dnessie.versionIceberg=1.8.0 --scan
 
   iceberg160_nessie0790:
     name: Nessie 0.79.0 / Iceberg 1.5.2
@@ -272,42 +264,3 @@ jobs:
       - name: Tools & Integrations tests
         run: ./gradlew intTest -Dnessie.versionNessie=0.79.0 -Dnessie.versionIceberg=1.5.2 --scan
 
-  iceberg143_nessie0780:
-    name: Nessie 0.78.0 / Iceberg 1.4.3
-    runs-on: ubuntu-24.04
-    env:
-      SPARK_LOCAL_IP: localhost
-
-    steps:
-      - name: Checkout Integrations Testing repo
-        uses: actions/checkout@v4
-
-      - name: Free disk space
-        uses: ./.github/actions/free-disk-space
-
-      - name: Setup gradle.properties
-        run: |
-          mkdir -p ~/.gradle
-          echo "org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
-          echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          # Java 17 required for Nessie build, Java 11 required for Flink & Presto
-          java-version: |
-            11
-            17
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: true
-          validate-wrappers: false
-
-      - name: Show Gradle projects
-        run: ./gradlew projects -Dnessie.versionNessie=0.78.0 -Dnessie.versionIceberg=1.4.3
-
-      - name: Tools & Integrations tests
-        run: ./gradlew intTest -Dnessie.versionNessie=0.78.0 -Dnessie.versionIceberg=1.4.3 --scan
