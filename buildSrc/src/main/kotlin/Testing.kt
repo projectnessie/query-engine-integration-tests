@@ -17,20 +17,31 @@
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.UnknownTaskException
+import org.gradle.api.plugins.JvmTestSuitePlugin
+import org.gradle.api.plugins.jvm.JvmTestSuite
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
+import org.gradle.testing.base.TestingExtension
 import org.projectnessie.nessierunner.gradle.NessieRunnerExtension
 import org.projectnessie.nessierunner.gradle.NessieRunnerPlugin
 
 fun Project.nessieConfigureTestTasks() {
   if (projectDir.resolve("src/test").exists()) {
+    apply<JvmTestSuitePlugin>()
+
+    val testingExtension = extensions.findByType(TestingExtension::class.java)
+    testingExtension!!.suites.withType<JvmTestSuite>().configureEach {
+      useJUnitJupiter(libsRequiredVersion("junit"))
+    }
+
     tasks.withType<Test>().configureEach {
       useJUnitPlatform {}
       val testJvmArgs: String? by project
