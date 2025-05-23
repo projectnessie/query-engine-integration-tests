@@ -79,11 +79,21 @@ public class IcebergDremioExtension implements ParameterResolver, ExecutionCondi
     if (systemPropertyPrefix == null || !systemPropertyPrefix.endsWith(".")) {
       throw new IllegalArgumentException("Invalid systemPropertyPrefix: " + systemPropertyPrefix);
     }
-    String apiBaseUrl = dremioUrl(); // same for all DremioHelper test params
+    String baseUrl = dremioUrl(); // same for all DremioHelper test params
     String token = readRequiredSystemProperty(systemPropertyPrefix + "token");
-    String projectId = readRequiredSystemProperty(systemPropertyPrefix + "project-id");
     String catalogName = readRequiredSystemProperty(systemPropertyPrefix + "catalog-name");
 
-    return new DremioHelper(token, apiBaseUrl, projectId, catalogName);
+    String projectId = System.getProperty(systemPropertyPrefix + "project-id");
+    String apiBaseUrl;
+    if (projectId != null) {
+      // dremio cloud
+      // https://docs.dremio.com/cloud/reference/api/
+      apiBaseUrl = baseUrl + "/v0/projects/" + projectId;
+    } else {
+      // dremio software
+      // https://docs.dremio.com/current/reference/api/
+      apiBaseUrl = baseUrl + "/api/v3";
+    }
+    return new DremioHelper(token, apiBaseUrl, catalogName);
   }
 }

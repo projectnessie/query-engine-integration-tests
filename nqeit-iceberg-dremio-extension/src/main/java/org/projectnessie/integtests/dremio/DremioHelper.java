@@ -42,9 +42,9 @@ import java.util.Set;
 import org.intellij.lang.annotations.Language;
 
 public class DremioHelper {
-  private String token;
-  private String projectUrl;
-  private String catalogName;
+  private final String token;
+  private final String apiBaseUrl;
+  private final String catalogName;
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -57,9 +57,9 @@ public class DremioHelper {
     }
   }
 
-  DremioHelper(String token, String apiBaseUrl, String projectId, String catalogName) {
+  DremioHelper(String token, String apiBaseUrl, String catalogName) {
     this.token = token;
-    this.projectUrl = apiBaseUrl + "/v0/projects/" + projectId;
+    this.apiBaseUrl = apiBaseUrl;
     this.catalogName = catalogName;
   }
 
@@ -68,7 +68,7 @@ public class DremioHelper {
   }
 
   public String getJobUrl(String jobId) {
-    return projectUrl + "/job/" + jobId;
+    return apiBaseUrl + "/job/" + jobId;
   }
 
   private String createPayload(String query) throws JsonProcessingException {
@@ -123,7 +123,8 @@ public class DremioHelper {
   }
 
   private void waitForJobCompletion(String jobId, String query) throws IOException {
-    // See docs: https://docs.dremio.com/cloud/reference/api/job/
+    // docs cloud: https://docs.dremio.com/cloud/reference/api/job/
+    // docs sw: https://docs.dremio.com/current/reference/api/job/
     String url = getJobUrl(jobId);
     Set<String> finalJobStates = new HashSet<>(asList("COMPLETED", "FAILED", "CANCELED"));
     // Default Timeout for engine-startup is 5min
@@ -165,7 +166,8 @@ public class DremioHelper {
   }
 
   private List<List<Object>> fetchQueryResult(String jobId) throws IOException {
-    // See docs: https://docs.dremio.com/cloud/reference/api/job/job-results
+    // docs cloud: https://docs.dremio.com/cloud/reference/api/job/job-results
+    // docs sw: https://docs.dremio.com/current/reference/api/job/job-results
     String url = getJobUrl(jobId) + "/results";
     String result = performHttpRequest(url, null);
 
@@ -181,9 +183,10 @@ public class DremioHelper {
   }
 
   private String submitQueryAndGetJobId(String query) throws IOException {
-    // See docs: https://docs.dremio.com/cloud/api/sql/
+    // docs cloud: https://docs.dremio.com/cloud/api/sql/
+    // docs sw: https://docs.dremio.com/current/reference/api/sql/
     String payload = createPayload(query);
-    String url = projectUrl + "/sql";
+    String url = apiBaseUrl + "/sql";
     String result = performHttpRequest(url, payload);
     JsonNode node = parseJson(result, url);
     JsonNode idNode = node.get("id");
