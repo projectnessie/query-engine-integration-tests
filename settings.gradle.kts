@@ -380,7 +380,7 @@ if (includeIcebergBuild) {
       //  doesn't really work here :(
       // substitute(module("org.apache.iceberg:iceberg-bundled-guava")).withClassifier("shadow").using(project(":iceberg-bundled-guava"))
       val scalaVersion = scalaRestrictionsForSourceBuild.first()
-      System.getProperty("sparkVersions", "3.1,3.2").split(",").forEach { sparkVersion ->
+      sparkRestrictions.forEach { sparkVersion ->
         if (sparkVersion != "3.1" || scalaVersion == "2.12") {
           listOf("spark", "spark-extensions", "spark-runtime").forEach { moduleName ->
             val fullName = "iceberg-$moduleName-${sparkVersion}_$scalaVersion"
@@ -395,7 +395,7 @@ if (includeIcebergBuild) {
           }
         }
       }
-      System.getProperty("flinkVersions", "1.16").split(",").forEach { flinkVersion ->
+      flinkRestrictions.forEach { flinkVersion ->
         substitute(module("org.apache.iceberg:iceberg-flink-$flinkVersion"))
           .using(project(":iceberg-flink:iceberg-flink-$flinkVersion"))
         substitute(module("org.apache.iceberg:iceberg-flink-runtime-$flinkVersion"))
