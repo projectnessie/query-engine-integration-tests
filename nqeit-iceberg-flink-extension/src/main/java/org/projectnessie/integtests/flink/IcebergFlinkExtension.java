@@ -233,7 +233,7 @@ public class IcebergFlinkExtension implements ParameterResolver {
     private FlinkHolder() {
 
       Configuration cfg = new Configuration();
-      cfg.setString(DeploymentOptions.TARGET, RemoteExecutor.NAME);
+      cfg.set(DeploymentOptions.TARGET, RemoteExecutor.NAME);
 
       if (System.getProperty(FLINK_REMOTE_HOST) != null) {
         System.getProperties().entrySet().stream()
@@ -252,7 +252,7 @@ public class IcebergFlinkExtension implements ParameterResolver {
         cfg.addAll(executionEnvironment.getConfiguration());
       } else {
         cfg.addAll(DISABLE_CLASSLOADER_CHECK_CONFIG);
-        cfg.setString(RestOptions.BIND_PORT, "10000-30000");
+        cfg.set(RestOptions.BIND_PORT, "10000-30000");
 
         flinkMiniCluster =
             new MiniCluster(
