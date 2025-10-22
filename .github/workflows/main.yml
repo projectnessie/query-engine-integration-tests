@@ -81,6 +81,10 @@ jobs:
           patch-branch: ${{env.ICEBERG_PATCH_BRANCH}}
           work-branch: iceberg_integtest
 
+      - name: Gradle 9 prereq
+        # Gradle 9 requires a project's directory to exist, even if it's empty.
+        run: mkdir "${{env.ICEBERG_DIR}}/bom"
+
       # Setup Gradle properties, heap requirements are for the "Integration test w/ Nessie".
       - name: Setup gradle.properties
         run: |
