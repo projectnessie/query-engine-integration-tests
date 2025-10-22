@@ -16,7 +16,7 @@ junit = "5.14.0"
 logback = "1.5.20"
 nessieBuildPlugins = "0.2.20"
 nessieRunPlugin = "0.32.2"
-shadowPlugin = "8.1.1"
+shadowPlugin = "9.2.2"
 slf4j = "1.7.36"
 spotlessPlugin = "8.0.0"
 testRerunPlugin = "0.1"
@@ -69,7 +69,7 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 microprofile-openapi = { module = "org.eclipse.microprofile.openapi:microprofile-openapi-api", version = "4.1.1" }
 nessie-runner-plugin = { module = "org.projectnessie:org.projectnessie.gradle.plugin", version.ref = "nessieRunPlugin" }
-shadow-plugin = { module = "com.github.johnrengelman:shadow", version.ref = "shadowPlugin" }
+shadow-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadowPlugin" }
 slf4j-api = {  module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-jcl-over-slf4j = { module = "org.slf4j:jcl-over-slf4j", version.ref = "slf4j" }
 slf4j-log4j-over-slf4j = { module = "org.slf4j:log4j-over-slf4j", version.ref = "slf4j" }
