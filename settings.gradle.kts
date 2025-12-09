@@ -16,10 +16,6 @@
 
 import java.util.Locale
 import java.util.Properties
-import org.gradle.api.internal.attributes.ImmutableAttributes
-import org.gradle.api.internal.project.ProjectIdentity
-import org.gradle.internal.component.local.model.DefaultProjectComponentSelector
-import org.gradle.util.Path
 
 if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11)) {
   throw GradleException("Build requires Java 11")
@@ -236,107 +232,6 @@ fun loadProperties(file: File): Properties {
   return props
 }
 
-fun loadNessieIcebergProjects(): Set<String> {
-  val nessieIcebergProjects = HashSet<String>()
-  loadProperties(file("$nessieSourceDir/gradle/projects.iceberg.properties")).keys.forEach {
-    nessieIcebergProjects.add(it.toString())
-  }
-
-  val sparkScala = loadProperties(file("$nessieSourceDir/integrations/spark-scala.properties"))
-  val allScalaVersions = LinkedHashSet<String>()
-  for (sparkVersion in sparkScala["sparkVersions"].toString().split(",")) {
-    val scalaVersions =
-      sparkScala["sparkVersion-${sparkVersion}-scalaVersions"].toString().split(",").map {
-        it.trim()
-      }
-    for (scalaVersion in scalaVersions) {
-      allScalaVersions.add(scalaVersion)
-      nessieIcebergProjects.add("nessie-spark-extensions-${sparkVersion}_$scalaVersion")
-    }
-  }
-  for (scalaVersion in allScalaVersions) {
-    nessieIcebergProjects.add("nessie-spark-extensions-base_$scalaVersion")
-    nessieIcebergProjects.add("nessie-spark-extensions-basetests_$scalaVersion")
-  }
-  nessieIcebergProjects.add("nessie-spark-extensions-base")
-  nessieIcebergProjects.add("nessie-spark-extensions")
-  nessieIcebergProjects.add("nessie-spark-3.2-extensions")
-
-  return nessieIcebergProjects
-}
-
-val nessieIcebergProjects = if (includeNessieBuild) loadNessieIcebergProjects() else setOf()
-
-val includedNessieVersion =
-  if (includeNessieBuild) file("$nessieSourceDir/version.txt").readText().trim() else "NONE"
-
-fun DependencySubstitution.manageNessieProjectDependency(
-  includedBuildDesc: String,
-  substitutions: DependencySubstitutions,
-): Boolean {
-  val req = requested
-  if (req is ModuleComponentSelector) {
-    if (
-      (req.group == "org.projectnessie.nessie" ||
-        req.group == "org.projectnessie.nessie-integrations" ||
-        (req.group == "org.projectnessie" && !req.module.startsWith("nessie-apprunner"))) &&
-        req.version.isEmpty()
-    ) {
-      val module = if (req.module == "nessie") "" else req.module
-      val targetBuild =
-        if (nessieIcebergProjects.contains(req.module)) ":nessie:nessie-iceberg" else ":nessie"
-
-      // project() doesn't handle included builds :(
-      // useTarget(project(":$targetBuild:$module"), "Project managed via $includedBuildDesc")
-
-      // GAV doesn't work, because GAV is not automatically resolved to a Gradle project :(
-      // useTarget(mapOf("group" to req.group, "name" to req.module, "version" to
-      // includedNessieVersion), "Version managed via $includedBuildDesc")
-
-      val prx = projectFromIncludedBuild(targetBuild, ":$module")
-      logger.info(
-        "Substituting {}'s dependency to '{}:{}' as project '{}' in build '{}'",
-        includedBuildDesc,
-        req.group,
-        req.module,
-        prx.projectPath,
-        prx.buildPath,
-      )
-      val target = if (prx.projectPath == ":") substitutions.platform(prx) else prx
-      useTarget(target, "Managed via $includedBuildDesc")
-      return true
-    }
-  }
-  return false
-}
-
-fun projectFromIncludedBuild(includedBuild: String, projectPath: String): ProjectComponentSelector {
-  // TODO this is dirty, but does its job, which is to substitute dependencies to
-  //  org.projectnessie:nessie-* to the projects built by the included Nessie build
-  try {
-    val buildPath = Path.path(includedBuild)
-    val path = Path.path(projectPath)
-    val prjIdentity =
-      if (path.name != null) ProjectIdentity.forSubproject(buildPath, path)
-      else ProjectIdentity.forRootProject(buildPath, "root")
-
-    // Gradle 8.11 changed the signature of DefaultProjectComponentSelector to take a Guava
-    // ImmutableSet as the 3rd parameter, but there's no way to simply access Guava from
-    // this settings.gradle.kts - therefore the whole Java reflection mess here...
-    val classDefaultProjectComponentSelector = DefaultProjectComponentSelector::class.java
-    val ctor = classDefaultProjectComponentSelector.getDeclaredConstructors()[0]
-    return ctor.newInstance(
-      prjIdentity,
-      ImmutableAttributes.EMPTY,
-      // Guava's ImmutableSet
-      ctor.getParameterTypes()[2].getDeclaredMethod("of").invoke(null),
-    ) as ProjectComponentSelector
-  } catch (x: Exception) {
-    x.printStackTrace()
-    throw x
-  }
-}
-
 if (includeNessieBuild) {
   logger.lifecycle("Including 'Nessie' from $nessieSourceDir")
   includeBuild(nessieSourceDir) { name = "nessie" }
@@ -356,88 +251,12 @@ System.setProperty("sparkVersions", sparkRestrictions.joinToString(","))
 
 if (includeIcebergBuild) {
   logger.lifecycle("Including 'Iceberg' from $icebergSourceDir")
-  includeBuild(icebergSourceDir) {
-    name = "iceberg"
-
-    val icebergVersions = mutableMapOf<String, String>()
-
-    // Replace dependencies in the "root" build with projects from the included build.
-    // Here: substitute declared
-    dependencySubstitution {
-      listOf(
-          "iceberg-api",
-          "iceberg-aws",
-          "iceberg-bundled-guava",
-          "iceberg-common",
-          "iceberg-core",
-          "iceberg-hive-metastore",
-          "iceberg-nessie",
-          "iceberg-parquet",
-        )
-        .forEach { moduleName ->
-          substitute(module("org.apache.iceberg:$moduleName")).using(project(":$moduleName"))
-        }
-      // TODO needs to depend on the `shadow` configuration of `:iceberg-bundled-guava`, but that
-      //  doesn't really work here :(
-      // substitute(module("org.apache.iceberg:iceberg-bundled-guava")).withClassifier("shadow").using(project(":iceberg-bundled-guava"))
-      val scalaVersion = scalaRestrictionsForSourceBuild.first()
-      sparkRestrictions.forEach { sparkVersion ->
-        if (sparkVersion != "3.1" || scalaVersion == "2.12") {
-          listOf("spark", "spark-extensions", "spark-runtime").forEach { moduleName ->
-            val fullName = "iceberg-$moduleName-${sparkVersion}_$scalaVersion"
-            substitute(module("org.apache.iceberg:$fullName"))
-              .using(project(":iceberg-spark:$fullName"))
-          }
-          if (sparkVersion == "3.1") {
-            substitute(module("org.apache.iceberg:iceberg-spark3"))
-              .using(project(":iceberg-spark:iceberg-spark-3.1_2.12"))
-            substitute(module("org.apache.iceberg:iceberg-spark3-extensions"))
-              .using(project(":iceberg-spark:iceberg-spark-extensions-3.1_2.12"))
-          }
-        }
-      }
-      flinkRestrictions.forEach { flinkVersion ->
-        substitute(module("org.apache.iceberg:iceberg-flink-$flinkVersion"))
-          .using(project(":iceberg-flink:iceberg-flink-$flinkVersion"))
-        substitute(module("org.apache.iceberg:iceberg-flink-runtime-$flinkVersion"))
-          .using(project(":iceberg-flink:iceberg-flink-runtime-$flinkVersion"))
-      }
-
-      val substitutions = this
-      all {
-        if (!manageNessieProjectDependency("Iceberg", substitutions)) {
-          val req = requested
-          if (req is ModuleComponentSelector && req.version.isEmpty()) {
-            var ver = icebergVersions["${req.group}:${req.module}"]
-            if (ver == null) {
-              ver = icebergVersions["${req.group}:*"]
-            }
-            if (ver != null) {
-              logger.info(
-                "Nessie/Iceberg - managed {}:{} with version {}",
-                req.group,
-                req.module,
-                ver,
-              )
-              useTarget(module("${req.group}:${req.module}:${ver}"), "Managed via Nessie")
-            }
-          }
-        }
-      }
-    }
-  }
+  includeBuild(icebergSourceDir) { name = "iceberg" }
 }
 
 if (includeNessieBuild) {
   logger.lifecycle("Including 'Nessie-Iceberg' from $nessieSourceDir/nessie-iceberg")
-  includeBuild("$nessieSourceDir/nessie-iceberg") {
-    name = "nessie-iceberg"
-
-    dependencySubstitution {
-      val substitutions = this
-      all { manageNessieProjectDependency("Nessie-Iceberg", substitutions) }
-    }
-  }
+  includeBuild("$nessieSourceDir/nessie-iceberg") { name = "nessie-iceberg" }
 }
 
 include("nqeit-nessie-common")
