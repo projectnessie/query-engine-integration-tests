@@ -16,7 +16,6 @@
 
 import java.util.Locale
 import java.util.Properties
-import org.gradle.api.internal.artifacts.DefaultBuildIdentifier
 import org.gradle.api.internal.attributes.ImmutableAttributes
 import org.gradle.api.internal.project.ProjectIdentity
 import org.gradle.internal.component.local.model.DefaultProjectComponentSelector
@@ -315,10 +314,12 @@ fun projectFromIncludedBuild(includedBuild: String, projectPath: String): Projec
   // TODO this is dirty, but does its job, which is to substitute dependencies to
   //  org.projectnessie:nessie-* to the projects built by the included Nessie build
   try {
+    val buildPath = Path.path(includedBuild)
     val path = Path.path(projectPath)
-    val buildIdent = DefaultBuildIdentifier(Path.path(includedBuild))
-    val buildTreePath = Path.path("$includedBuild:$projectPath")
-    val prjIdentity = ProjectIdentity(buildIdent, buildTreePath, path, path.name ?: "root")
+    val prjIdentity =
+      if (path.name != null) ProjectIdentity.forSubproject(buildPath, path)
+      else ProjectIdentity.forRootProject(buildPath, "root")
+
     // Gradle 8.11 changed the signature of DefaultProjectComponentSelector to take a Guava
     // ImmutableSet as the 3rd parameter, but there's no way to simply access Guava from
     // this settings.gradle.kts - therefore the whole Java reflection mess here...
