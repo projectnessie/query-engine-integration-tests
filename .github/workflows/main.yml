@@ -225,7 +225,7 @@ jobs:
         run: ./gradlew projects -Dnessie.versionNessie=0.103.0 -Dnessie.versionIceberg=1.8.0
 
       - name: Tools & Integrations tests
-        run: ./gradlew intTest -Dnessie.versionNessie=0.103.0 -Dnessie.versionIceberg=1.8.0 --scan
+        run: ./gradlew test intTest -Dnessie.versionNessie=0.103.0 -Dnessie.versionIceberg=1.8.0 --scan
 
   iceberg192_nessie01044:
     name: Nessie 0.104.4 / Iceberg 1.9.2
@@ -262,7 +262,7 @@ jobs:
         run: ./gradlew projects -Dnessie.versionNessie=0.104.4 -Dnessie.versionIceberg=1.9.2
 
       - name: Tools & Integrations tests
-        run: ./gradlew intTest -Dnessie.versionNessie=0.104.4 -Dnessie.versionIceberg=1.9.2 --scan
+        run: ./gradlew test intTest -Dnessie.versionNessie=0.104.4 -Dnessie.versionIceberg=1.9.2 --scan
 
   iceberg1100_nessie01055:
     name: Nessie 0.105.5 / Iceberg 1.10.0
@@ -299,4 +299,4 @@ jobs:
         run: ./gradlew projects -Dnessie.versionNessie=0.105.5 -Dnessie.versionIceberg=1.10.0
 
       - name: Tools & Integrations tests
-        run: ./gradlew intTest -Dnessie.versionNessie=0.105.5 -Dnessie.versionIceberg=1.10.0 --scan
+        run: ./gradlew test intTest -Dnessie.versionNessie=0.105.5 -Dnessie.versionIceberg=1.10.0 --scan
