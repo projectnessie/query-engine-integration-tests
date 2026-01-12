@@ -45,7 +45,7 @@ dependencies {
 // Note: Nessie-Quarkus server dependency and Projectnessie plugin are automatically configured,
 // when the Projectnessie plugin's included in the `plugins` section.
 
-forceJava11ForTests()
+forceJava17ForTests()
 
 tasks.withType<Test>().configureEach {
   systemProperty("sparkScala.sparkMajorVersion", sparkScala.sparkMajorVersion)

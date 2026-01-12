@@ -67,12 +67,12 @@ fun DependencyHandlerScope.forScala(scalaVersion: String) {
  * Forces all [Test] tasks to use Java 11 for test execution, which is mandatory for tests using
  * Spark.
  */
-fun Project.forceJava11ForTests() {
+fun Project.forceJava17ForTests() {
   if (!JavaVersion.current().isJava11) {
     tasks.withType(Test::class.java).configureEach {
       val javaToolchains = project.extensions.findByType(JavaToolchainService::class.java)
       javaLauncher.set(
-        javaToolchains!!.launcherFor { languageVersion.set(JavaLanguageVersion.of(11)) }
+        javaToolchains!!.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) }
       )
     }
   }

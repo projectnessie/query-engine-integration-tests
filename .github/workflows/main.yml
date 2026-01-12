@@ -33,8 +33,8 @@ jobs:
       NESSIE_DIR: included-builds/nessie
       NESSIE_MAIN_REPOSITORY: projectnessie/nessie
       NESSIE_MAIN_BRANCH: main
-      NESSIE_PATCH_REPOSITORY: ''
-      NESSIE_PATCH_BRANCH: ''
+      NESSIE_PATCH_REPOSITORY: 'snazy/nessie'
+      NESSIE_PATCH_BRANCH: 'integ-bump/iceberg'
       ICEBERG_DIR: included-builds/iceberg
       ICEBERG_MAIN_REPOSITORY: apache/iceberg
       ICEBERG_MAIN_BRANCH: main

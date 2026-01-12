@@ -50,7 +50,7 @@ fun Project.nessieConfigureJava() {
 
   tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    options.release.set(11)
+    options.release.set(17)
     options.compilerArgs.add("-parameters")
 
     // Required to enable incremental compilation w/ immutables, see
