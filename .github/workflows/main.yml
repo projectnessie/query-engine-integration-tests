@@ -89,7 +89,7 @@ jobs:
       - name: Setup gradle.properties
         run: |
           mkdir -p ~/.gradle
-          echo "org.gradle.jvmargs=-Xms2g -Xmx4g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
+          echo "org.gradle.jvmargs=-Xms2g -Xmx6g -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" >> ~/.gradle/gradle.properties
           echo "org.gradle.vfs.watch=false" >> ~/.gradle/gradle.properties
 
       - name: Set up JDK
