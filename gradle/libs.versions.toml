@@ -1,6 +1,6 @@
 [versions]
 awssdk = "2.53.1"
-checkstyle = "13.11.0"
+checkstyle = "14.0.0"
 errorprone = "2.50.0"
 errorpronePlugin = "5.1.0"
 errorproneSlf4j = "0.1.29"
