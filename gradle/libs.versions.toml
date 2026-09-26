@@ -18,7 +18,7 @@ nessieBuildPlugins = "0.2.20"
 nessieRunPlugin = "0.32.7"
 shadowPlugin = "9.6.1"
 slf4j = "2.0.20"
-spotlessPlugin = "8.10.2"
+spotlessPlugin = "8.10.3"
 testRerunPlugin = "0.1"
 
 [bundles]
