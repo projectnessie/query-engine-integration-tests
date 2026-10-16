@@ -161,7 +161,7 @@ fun Project.forceJavaVersionForTests(requiredJavaVersion: Int) {
       javaLauncher.set(
         javaToolchains!!.launcherFor {
           languageVersion.set(JavaLanguageVersion.of(requiredJavaVersion))
-        }
+        },
       )
     }
   }

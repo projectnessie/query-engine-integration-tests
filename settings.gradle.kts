@@ -97,7 +97,7 @@ fun projectCanonicalPath(sub: String): File {
     val additionalPropertiesFile = file("$additionalPropertiesDir/additional-build.properties")
     val additionalProperties = Properties()
     additionalProperties.putAll(
-      System.getProperties().filter { e -> e.key.toString().startsWith("nessie.") }
+      System.getProperties().filter { e -> e.key.toString().startsWith("nessie.") },
     )
     additionalPropertiesFile.writer().use { writer ->
       additionalProperties.store(writer, "Generated")
@@ -173,7 +173,7 @@ System.err.println(
   Flink restrictions:     $flinkRestrictions
   Presto restrictions:    $prestoRestrictions
 """
-    .trimIndent()
+    .trimIndent(),
 )
 
 fun updateDefaultVersion(restrictions: Set<String>, project: String) {
@@ -181,7 +181,7 @@ fun updateDefaultVersion(restrictions: Set<String>, project: String) {
     val ver = restrictions.first()
     if (
       frameworksVersions.containsKey(
-        "version${project.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }}-$ver"
+        "version${project.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }}-$ver",
       )
     ) {
       frameworksVersions["${project}DefaultVersion"] = ver
