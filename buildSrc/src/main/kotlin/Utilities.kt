@@ -72,7 +72,7 @@ fun Project.forceJava17ForTests() {
     tasks.withType(Test::class.java).configureEach {
       val javaToolchains = project.extensions.findByType(JavaToolchainService::class.java)
       javaLauncher.set(
-        javaToolchains!!.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) }
+        javaToolchains!!.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) },
       )
     }
   }

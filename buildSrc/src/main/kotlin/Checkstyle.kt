@@ -59,7 +59,7 @@ fun Project.nessieConfigureCheckstyle() {
     //         'com.google.collections:google-collections:1.0'
     //         also provided by [com.google.guava:guava:33.0.0-jre(jreRuntimeElements)]
     resolutionStrategy.capabilitiesResolution.withCapability(
-      "com.google.collections:google-collections"
+      "com.google.collections:google-collections",
     ) {
       selectHighestVersion()
     }

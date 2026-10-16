@@ -55,7 +55,7 @@ fun Project.nessieConfigureErrorprone() {
               }
             }
             checksMap
-          }
+          },
         )
 
     options.errorprone.checks.putAll(checksMapProperty)

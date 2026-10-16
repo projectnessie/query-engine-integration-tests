@@ -49,7 +49,7 @@ tasks.withType<Test>().configureEach {
 }
 
 forceJavaVersionForTests(
-  11
+  11,
 )
 
 // Note: Nessie-Quarkus server dependency and Projectnessie plugin are automatically configured,
