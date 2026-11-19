@@ -87,11 +87,10 @@ public class PrestoJdbcExtension implements ParameterResolver {
 
       System.getProperties().entrySet().stream()
           .filter(e -> e.getKey().toString().startsWith(PRESTO_SESSION_PREFIX))
-          .forEach(
-              e ->
-                  properties.put(
-                      e.getKey().toString().substring(PRESTO_SESSION_PREFIX.length()),
-                      e.getValue().toString()));
+          .forEach(e ->
+              properties.put(
+                  e.getKey().toString().substring(PRESTO_SESSION_PREFIX.length()),
+                  e.getValue().toString()));
 
       prestoServer.populateConnectionProperties(properties);
 
@@ -379,14 +378,13 @@ public class PrestoJdbcExtension implements ParameterResolver {
                 int columnCount = rs.getMetaData().getColumnCount();
                 action.accept(
                     IntStream.rangeClosed(1, columnCount)
-                        .mapToObj(
-                            c -> {
-                              try {
-                                return rs.getObject(c);
-                              } catch (SQLException e) {
-                                throw new RuntimeException(e);
-                              }
-                            })
+                        .mapToObj(c -> {
+                          try {
+                            return rs.getObject(c);
+                          } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                          }
+                        })
                         .collect(Collectors.toList()));
                 return true;
               } catch (SQLException e) {
