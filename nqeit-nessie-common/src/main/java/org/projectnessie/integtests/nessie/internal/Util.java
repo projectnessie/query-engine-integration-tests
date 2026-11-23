@@ -88,10 +88,9 @@ public class Util {
   private static void applySystemPropertiesByPrefix(Map<String, String> params, String keyPrefix) {
     System.getProperties().entrySet().stream()
         .filter(e -> e.getKey().toString().startsWith(keyPrefix))
-        .forEach(
-            e ->
-                params.put(
-                    e.getKey().toString().substring(keyPrefix.length()), e.getValue().toString()));
+        .forEach(e ->
+            params.put(
+                e.getKey().toString().substring(keyPrefix.length()), e.getValue().toString()));
   }
 
   public static String dateTimeString() {

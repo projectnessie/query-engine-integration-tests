@@ -238,11 +238,10 @@ public class IcebergFlinkExtension implements ParameterResolver {
       if (System.getProperty(FLINK_REMOTE_HOST) != null) {
         System.getProperties().entrySet().stream()
             .filter(e -> e.getKey().toString().startsWith(FLINK_CONFIG_PREFIX))
-            .forEach(
-                e ->
-                    cfg.setString(
-                        e.getKey().toString().substring(FLINK_CONFIG_PREFIX.length()),
-                        e.getValue().toString()));
+            .forEach(e ->
+                cfg.setString(
+                    e.getKey().toString().substring(FLINK_CONFIG_PREFIX.length()),
+                    e.getValue().toString()));
 
         String flinkHost = System.getProperty(FLINK_REMOTE_HOST);
         int flinkPort = Integer.getInteger(FLINK_REMOTE_PORT, 8081);
